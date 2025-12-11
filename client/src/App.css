@@ -1,0 +1,72 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* App.css 맨 아래에 추가 */
+
+/* 평소에는 인쇄용 영역(연구노트)을 화면에서 숨김 */
+.print-only {
+  display: none;
+}
+
+/* 인쇄 버튼을 눌렀을 때(인쇄 모드) 적용되는 스타일 */
+@media print {
+  /* 1. 목록 화면, 버튼 등 원래 화면은 싹 숨김 */
+  .no-print {
+    display: none !important;
+  }
+
+  /* 2. 숨겨뒀던 연구노트 영역만 보이게 함 */
+  .print-only {
+    display: block !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+
+  /* 3. 배경색 그래픽도 인쇄되도록 설정 (크롬 기준) */
+  body {
+    -webkit-print-color-adjust: exact;
+  }
+  
+  /* 불필요한 여백 제거 */
+  @page {
+    margin: 0;
+  }
+}
