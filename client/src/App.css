@@ -1,72 +1,257 @@
-.App {
+/* 전체 배경 & 베이스 */
+.app-root {
+  min-height: 100vh;
+  background: #020617; /* 아주 진한 남색 */
+  color: #e5e7eb;
+  font-family: -apple-system, BlinkMacSystemFont, system-ui, "Pretendard",
+    "Noto Sans KR", sans-serif;
+}
+
+/* 가운데 정렬된 쉘 */
+.app-header,
+.app-main {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 16px 24px;
+}
+
+/* 헤더 */
+.app-header {
+  padding-top: 32px;
+  padding-bottom: 24px;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.app-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.app-header-meta {
+  font-size: 13px;
+  color: #9ca3af;
+  margin-bottom: 16px;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* 탭 버튼 */
+.app-tabs {
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  gap: 8px;
+  margin-top: 12px;
 }
 
-.App-link {
-  color: #61dafb;
+.tab {
+  border-radius: 999px;
+  border: 1px solid #1f2937;
+  padding: 6px 14px;
+  font-size: 13px;
+  background: #020617;
+  color: #e5e7eb;
+  cursor: pointer;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.tab.active {
+  background: #2563eb;
+  border-color: #2563eb;
 }
 
-/* App.css 맨 아래에 추가 */
+/* 메인 */
+.app-main {
+  padding-bottom: 40px;
+}
 
-/* 평소에는 인쇄용 영역(연구노트)을 화면에서 숨김 */
-.print-only {
+/* 카드 공통 */
+.card {
+  background: radial-gradient(circle at top left, #0b1220, #020617 65%);
+  border-radius: 14px;
+  border: 1px solid #111827;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.7);
+  margin-bottom: 24px;
+}
+
+.card-header {
+  padding: 16px 20px 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.card-body {
+  padding: 8px 20px 16px;
+}
+
+/* 버튼 */
+.primary-btn,
+.ghost-btn,
+.small-btn {
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 6px 14px;
+}
+
+.primary-btn {
+  background: #2563eb;
+  color: #f9fafb;
+}
+
+.ghost-btn {
+  margin-left: auto;
+  background: transparent;
+  color: #9ca3af;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+}
+
+.small-btn {
+  background: #1f2937;
+  color: #e5e7eb;
+}
+
+/* 배지 */
+.badge {
+  margin-left: 8px;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.15);
+  color: #bfdbfe;
+}
+
+/* 에러 */
+.error-banner {
+  max-width: 1120px;
+  margin: 0 auto 12px;
+  padding: 8px 12px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #fecaca;
+  border: 1px solid rgba(248, 113, 113, 0.6);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+/* 폼 레이아웃 */
+.new-note-form {
+  margin-top: 4px;
+}
+
+.new-note-form.collapsed {
   display: none;
 }
 
-/* 인쇄 버튼을 눌렀을 때(인쇄 모드) 적용되는 스타일 */
-@media print {
-  /* 1. 목록 화면, 버튼 등 원래 화면은 싹 숨김 */
-  .no-print {
-    display: none !important;
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 20px;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-row.full {
+  grid-column: 1 / -1;
+}
+
+label {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* 인풋 / 텍스트area */
+.input,
+.textarea,
+.react-datepicker-wrapper .input {
+  width: 100%;
+  background: #020617;
+  border-radius: 8px;
+  border: 1px solid #1f2937;
+  padding: 6px 10px;
+  font-size: 13px;
+  color: #e5e7eb;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.4);
+}
+
+.textarea {
+  resize: vertical;
+}
+
+/* 폼 액션 */
+.form-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 테이블 */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid #111827;
+  background: #020617;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table thead {
+  background: #020617;
+}
+
+.table th,
+.table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #111827;
+  text-align: left;
+}
+
+.table th {
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.table tbody tr:hover {
+  background: rgba(15, 23, 42, 0.9);
+}
+
+/* 그 밖의 텍스트 */
+.muted {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
   }
 
-  /* 2. 숨겨뒀던 연구노트 영역만 보이게 함 */
-  .print-only {
-    display: block !important;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
   }
 
-  /* 3. 배경색 그래픽도 인쇄되도록 설정 (크롬 기준) */
-  body {
-    -webkit-print-color-adjust: exact;
-  }
-  
-  /* 불필요한 여백 제거 */
-  @page {
-    margin: 0;
+  .ghost-btn {
+    align-self: flex-end;
   }
 }
