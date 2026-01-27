@@ -904,6 +904,7 @@ function buildNoteSectionHtml(n) {
                       <tr><th>보고주차</th><td>${encodeHtml(weekText)}</td></tr>
                       <tr><th>제목</th><td>${encodeHtml(n.title) || '-'}</td></tr>
                       <tr><th>기간</th><td>${encodeHtml(period)}</td></tr>
+                      <tr><th>금주 연구 목표</th><td>${goalHtml}</td></tr>
                     </tbody>
                   </table>
                 </td>
@@ -921,11 +922,6 @@ function buildNoteSectionHtml(n) {
               </tr>
             </tbody>
           </table>
-        </div>
-
-        <div class="goal-box">
-          <div class="section-label">금주 연구 목표</div>
-          <div class="section-body">${goalHtml}</div>
         </div>
 
         <table class="content-table">
