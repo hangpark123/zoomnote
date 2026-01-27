@@ -1,70 +1,98 @@
-# Getting Started with Create React App
+# ZoomNote - 정보통신연구소 연구노트 시스템
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**ZoomNote**는 아이알링크(주) 정보통신연구소의 주간 업무 보고 및 연구 노트를 효율적으로 관리하기 위한 **Zoom Phone 연동 통합 시스템**입니다.
+Zoom 통화 기록 자동 연동, 주간 리포트 생성, 전자 결재(검토자/확인자), 그리고 관리자 기능을 통해 연구소 업무를 체계화합니다.
 
-## Available Scripts
+## ✨ 주요 기능
 
-In the project directory, you can run:
+### 1. 📝 연구노트 작성 및 관리
+- **주간 자동 생성**: 매주 월요일, 해당 주차의 연구노트가 자동으로 생성됩니다.
+- **Zoom Phone 연동**: Zoom 통화 이력이 자동으로 불러와지며, 통화 내용을 바탕으로 업무 일지를 작성할 수 있습니다. (녹음 파일 듣기 지원)
+- **에디터**: 이미지 첨부, 텍스트 서식 등을 지원하는 리치 텍스트 에디터를 제공합니다.
+- **임시 저장 및 제출**: 작성 중인 내용은 자동/수동 저장이 가능하며, 완료 시 검토자에게 제출됩니다.
 
-### `npm start`
+### 2. 👥 부서별 문서함 & 전자 결재
+- **문서 조회**: 작성된 연구노트는 부서별로 공유되며, 권한에 따라 열람할 수 있습니다.
+- **PDF 저장**: 여러 건의 연구노트를 선택하여 하나의 PDF 파일로 일괄 변환 및 다운로드가 가능합니다.
+- **결재 시스템**: 작성자 -> 검토자(팀장) -> 확인자(소장) 단계의 전자 서명 기능을 제공합니다.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 3. 🛠 관리자(Admin) 기능
+- **직원 현황 관리**: 전체 직원의 주간 연구노트 제출 현황을 한눈에 파악할 수 있습니다.
+- **휴가자 및 누락자 관리**:
+    - **주차 휴가자 설정**: 특정 주차에 휴가인 인원을 설정하여 제출 대상에서 제외합니다.
+    - **누락자 목록**: 매주 연구노트를 생성하지 않거나 제출하지 않은 인원을 자동으로 집계하여 경고(Missing Box)를 표시합니다.
+- **문서 수정 권한**: 관리자는 다른 직원의 문서를 열람하고 필요한 경우 수정하거나 삭제할 수 있습니다.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 4. 🎨 UI/UX 편의성
+- **다크 모드**: 야간 작업 시 눈의 피로를 줄여주는 다크 모드를 완벽 지원합니다.
+- **반응형 디자인**: 다양한 해상도에서 최적화된 레이아웃을 제공합니다. (직원 카드, 검색창 등)
+- **부서별 검색**: 작성자, 제목, 문서번호 등으로 빠르고 정확하게 문서를 찾을 수 있습니다.
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 🚀 설치 및 실행 방법
 
-### `npm run build`
+### 필수 요구사항
+- Node.js (v14 이상 권장)
+- MySQL / MariaDB (데이터베이스)
+- Zoom App Credentials (Zoom API 연동 시)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 1. 환경 변수 설정 (`.env`)
+프로젝트 루트와 `client` 폴더에 `.env` 파일이 필요합니다. (현재 저장소에 포함됨)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 2. 패키지 설치
+```bash
+# 서버 의존성 설치
+npm install
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+# 클라이언트 의존성 설치
+cd client
+npm install
+```
 
-### `npm run eject`
+### 3. 데이터베이스 설정
+`db/research_notes_schema.sql` 파일을 실행하여 초기 테이블 구조를 생성합니다.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 4. 빌드 및 실행
+```bash
+# 클라이언트 빌드
+cd client
+npm run build
+cd ..
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+# 서버 실행
+node server.js
+# 또는 PM2 사용 시: pm2 start server.js --name zoomnote
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+---
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 📖 사용자 가이드 (User Guide)
 
-## Learn More
+### 1. 로그인 및 메인 화면
+- 시스템 접속 시 자동으로 SSO 또는 사전 정의된 계정으로 로그인됩니다.
+- **내 연구노트 작성**: 이번 주차의 업무 내용을 기록합니다. 'Zoom 통화 내역' 버튼을 눌러 통화 기록을 참고할 수 있습니다.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### 2. 연구노트 제출
+- 작성이 완료되면 **[제출]** 버튼을 누릅니다.
+- 제출 후에는 수정이 제한될 수 있으며, 검토자(팀장)에게 알림이 갑니다.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### 3. PDF 저장
+- **부서별 문서함** 탭에서 본인 또는 부서원의 노트를 선택합니다.
+- 우측 상단의 **[PDF 저장]** 버튼을 눌러 문서를 다운로드/인쇄할 수 있습니다.
 
-### Code Splitting
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## 🛡 관리자 가이드 (Admin Guide)
 
-### Analyzing the Bundle Size
+### 1. 주차 누락자 확인
+- **관리자 수정** 탭으로 이동합니다.
+- 화면 중앙의 **'주차 누락자 목록'** 박스를 확인합니다. (노란색/회색 박스)
+- 해당 주차에 문서를 생성하지 않은 직원이 표시됩니다.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### 2. 휴가 처리
+- **'주차 휴가자 설정'** 박스에서 휴가 중인 직원을 체크합니다.
+- 체크된 직원은 누락자 목록에서 제외되며 '휴가' 상태로 표시됩니다.
 
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### 3. 문서 강제 수정
+- 직원이 실수로 잘못 작성했거나 수정이 필요한 경우, 관리자 권한으로 문서를 열어 내용을 수정하고 저장할 수 있습니다.
