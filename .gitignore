@@ -1,1 +1,14 @@
 node_modules
+.env
+.env.*.local
+
+# Build outputs
+client/build
+build
+
+# Uploads / exports
+uploads
+*.log
+
+# Local dumps
+test.csv
