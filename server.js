@@ -1763,6 +1763,11 @@ const clientBuildPath = path.join(__dirname, 'client', 'build');
 if (fs.existsSync(clientBuildPath)) {
   const staticOpts = {
     setHeaders(res, filePath) {
+      // 캐시 무효화: 줌 앱이 항상 최신 CSS/JS를 로드하도록 강제
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+
       if (filePath.endsWith('.js')) res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
       else if (filePath.endsWith('.css')) res.setHeader('Content-Type', 'text/css; charset=utf-8');
       else if (filePath.endsWith('.html')) res.setHeader('Content-Type', 'text/html; charset=utf-8');

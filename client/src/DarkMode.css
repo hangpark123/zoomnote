@@ -1,0 +1,173 @@
+/* Git에서 가져온 다크모드 스타일 */
+
+:root {
+    --input-bg: #ffffff;
+    --toolbar-bg: #f8fafc;
+    --code-bg: #f8fafc;
+}
+
+[data-theme='dark'] {
+    --primary: #3b82f6;
+    --primary-hover: #60a5fa;
+    --bg-color: #0f172a;
+    --surface-color: #1e293b;
+    --surface-hover: #334155;
+    --border-color: #334155;
+    --text-main: #f1f5f9;
+    --text-sub: #94a3b8;
+    --danger: #f87171;
+
+    --input-bg: #1e293b;
+    --toolbar-bg: #334155;
+    --code-bg: #0f172a;
+}
+
+[data-theme='dark'] input,
+[data-theme='dark'] select,
+[data-theme='dark'] textarea,
+[data-theme='dark'] option {
+    background-color: var(--input-bg) !important;
+    color: var(--text-main) !important;
+    border-color: var(--border-color);
+}
+
+[data-theme='dark'] input[readonly],
+[data-theme='dark'] input[disabled],
+[data-theme='dark'] textarea[readonly],
+[data-theme='dark'] textarea[disabled] {
+    background-color: #334155 !important;
+    color: #94a3b8 !important;
+    cursor: not-allowed;
+}
+
+[data-theme='dark'] input::placeholder,
+[data-theme='dark'] textarea::placeholder {
+    color: var(--text-sub);
+    opacity: 0.6;
+}
+
+[data-theme='dark'] .app-header-meta {
+    color: var(--text-main);
+}
+
+/* Dark Mode Toggle Switch */
+.theme-toggle-fixed {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    z-index: 1000;
+}
+
+.theme-toggle-btn {
+    width: 56px;
+    height: 30px;
+    border-radius: 15px;
+    background-color: #e2e8f0;
+    border: 2px solid #cbd5e1;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+}
+
+.theme-toggle-btn:hover {
+    background-color: #cbd5e1;
+}
+
+[data-theme='dark'] .theme-toggle-btn {
+    background-color: #334155;
+    border-color: #475569;
+}
+
+[data-theme='dark'] .theme-toggle-btn:hover {
+    background-color: #475569;
+}
+
+.toggle-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    position: absolute;
+    left: 2px;
+    transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme='dark'] .toggle-thumb {
+    transform: translateX(26px);
+    background-color: #0f172a;
+}
+
+/* Quill Editor Dark Mode */
+[data-theme='dark'] .ql-toolbar button,
+[data-theme='dark'] .ql-toolbar .ql-picker-label {
+    color: #e2e8f0 !important;
+}
+
+[data-theme='dark'] .ql-toolbar button svg,
+[data-theme='dark'] .ql-toolbar .ql-picker-label svg {
+    stroke: #e2e8f0 !important;
+}
+
+[data-theme='dark'] .ql-toolbar button:hover,
+[data-theme='dark'] .ql-toolbar .ql-picker-label:hover {
+    color: #ffffff !important;
+}
+
+[data-theme='dark'] .ql-toolbar button:hover svg,
+[data-theme='dark'] .ql-toolbar .ql-picker-label:hover svg {
+    stroke: #ffffff !important;
+}
+
+[data-theme='dark'] .ql-toolbar .ql-stroke {
+    stroke: #e2e8f0 !important;
+}
+
+[data-theme='dark'] .ql-toolbar .ql-fill {
+    fill: #e2e8f0 !important;
+}
+
+/* Week Grid Buttons Dark Mode */
+[data-theme='dark'] button[style*="background:#ecfdf3"] {
+    background: #064e3b !important;
+    color: #ecfdf5 !important;
+    border-color: #059669 !important;
+}
+
+[data-theme='dark'] button[style*="background:#eff6ff"] {
+    background: #1e3a8a !important;
+    color: #dbeafe !important;
+    border-color: #1d4ed8 !important;
+}
+
+[data-theme='dark'] button[style*="background:#f8fafc"] {
+    background: #334155 !important;
+    color: #94a3b8 !important;
+    border-color: #475569 !important;
+}
+
+/* Table Dark Mode */
+[data-theme='dark'] .table tbody tr:hover {
+    background-color: #334155;
+}
+
+/* Vacation/Missing Box Dark Mode */
+[data-theme='dark'] .vacation-box,
+[data-theme='dark'] .missing-box {
+    background: var(--surface-color);
+    border-color: var(--border-color);
+}
+
+[data-theme='dark'] .missing-box-title {
+    color: var(--text-main);
+}
+
+[data-theme='dark'] .missing-user-badge {
+    background-color: var(--surface-hover);
+    color: var(--text-main);
+    border-color: var(--border-color);
+}

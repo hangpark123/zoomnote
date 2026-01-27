@@ -1443,26 +1443,10 @@ function App() {
                     <button
                       key={w.week}
                       type="button"
+                      className={`week-cell ${w.status}`}
                       disabled={w.status === 'vacation'}
                       onClick={() => handleMyWeekCellClick(w)}
                       title={w.status === 'done' ? '보기' : w.status === 'missing' ? '작성' : '휴가'}
-                      style={{
-                        width: '100%',
-                        padding: '6px 8px',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: 6,
-                        background: w.status === 'done' ? '#ecfdf3' : w.status === 'vacation' ? '#eff6ff' : '#f8fafc',
-                        color: w.status === 'done' ? '#166534' : w.status === 'vacation' ? '#1e40af' : '#475569',
-                        fontSize: 12,
-                        textAlign: 'center',
-                        whiteSpace: 'pre-line',
-                        lineHeight: '16px',
-                        cursor: w.status === 'vacation' ? 'default' : 'pointer',
-                        opacity: w.status === 'vacation' ? 0.7 : 1,
-                        userSelect: 'none',
-                        appearance: 'none',
-                        WebkitAppearance: 'none'
-                      }}
                     >
                       {w.status === 'vacation'
                         ? `휴가\n(${w.week}주)`
@@ -1628,7 +1612,7 @@ function App() {
                         </div>
                         <div className="form-group col-4">
                           <label>문서 번호</label>
-                          <input className="input" value="저장 시 자동 생성" readOnly style={{ backgroundColor: '#f3f4f6', color: '#999' }} />
+                          <input className="input readonly-hint" value="저장 시 자동 생성" readOnly />
                         </div>
                         <div className="form-group col-12">
                           <label>보고 제목</label>
@@ -2038,17 +2022,16 @@ function App() {
               {adminMissing.length > 0 && (
                 <div className="missing-box">
                   <div className="vacation-box-header">
-                    <div className="missing-box-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <div className="missing-box-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span>주차 누락자 목록</span>
-                      </div>
-                      <span style={{ fontSize: 12, fontWeight: 500 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div className="missing-box-title">주차 누락자 목록</div>
+                      <span className="muted" style={{ fontSize: 12 }}>
                         (총 {adminMissing.length}명)
                       </span>
                     </div>
                     <button
                       type="button"
                       className="secondary-btn"
+                      style={{ padding: '6px 10px' }}
                       onClick={() => setAdminMissingOpen((v) => !v)}
                     >
                       {adminMissingOpen ? '접기' : '펼치기'}
@@ -2206,275 +2189,268 @@ function App() {
       </main>
 
       {/* 인쇄/보기 모달 */}
-      {
-        previewNote && (
-          <div className="modal-overlay" onClick={() => setPreviewNote(null)}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
-              <div className="print-preview-area">
-                <h1>아이알링크㈜ 정보통신연구소 연구노트</h1>
+      {previewNote && (
+        <div className="modal-overlay" onClick={() => setPreviewNote(null)}>
+          <div className="modal-content print-modal" onClick={e => e.stopPropagation()}>
+            <div className="print-preview-area">
+              <h1>아이알링크㈜ 정보통신연구소 연구노트</h1>
 
-                <div className="print-top-row">
-                  <div className="print-meta-grid">
-                    <div className="label">부서</div>
-                    <div>{previewNote.department_name || '-'}</div>
+              <div className="print-top-row">
+                <div className="print-meta-grid">
+                  <div className="label">부서</div>
+                  <div>{previewNote.department_name || '-'}</div>
 
-                    <div className="label">작성자</div>
-                    <div>{previewNote.writer_name || '-'}</div>
+                  <div className="label">작성자</div>
+                  <div>{(previewNote.writer_name || '-').split('/')[0]}</div>
 
-                    <div className="label">기록일자</div>
-                    <div>{toDateString(previewNote.record_date) || '-'}</div>
+                  <div className="label">기록일자</div>
+                  <div>{toDateString(previewNote.record_date) || '-'}</div>
 
-                    <div className="label">문서번호</div>
-                    <div>{previewNote.serial_no || '-'}</div>
+                  <div className="label">문서번호</div>
+                  <div>{previewNote.serial_no || '-'}</div>
 
-                    <div className="label">보고주차</div>
-                    <div>{previewNote.report_year ? `${previewNote.report_year}년 ${previewNote.report_week}주차` : '-'}</div>
+                  <div className="label">보고주차</div>
+                  <div>{previewNote.report_year ? `${previewNote.report_year}년 ${previewNote.report_week}주차` : '-'}</div>
 
-                    <div className="label">제목</div>
-                    <div>{previewNote.title || '-'}</div>
+                  <div className="label">제목</div>
+                  <div>{previewNote.title || '-'}</div>
 
-                    <div className="label">기간</div>
-                    <div>{toDateString(previewNote.period_start)} ~ {toDateString(previewNote.period_end)}</div>
+                  <div className="label">기간</div>
+                  <div>{toDateString(previewNote.period_start)} ~ {toDateString(previewNote.period_end)}</div>
+
+                  <div className="label">금주 연구 목표</div>
+                  <div style={{ whiteSpace: 'pre-line' }}>{previewNote.weekly_goal || '-'}</div>
+                </div>
+
+                <div className="print-sign-grid">
+                  <div className="print-sign-box">
+                    <div className="role">기록자</div>
+                    <div className="body">
+                      {renderSignature(previewNote.writer_signature_data, previewNote.writer_signature_type)}
+                      <div className="name">{previewNote.writer_name || '-'}</div>
+                      <div className="time">{toDateTimeMinuteString(previewNote.created_at) || '-'}</div>
+                    </div>
                   </div>
-
-                  <div className="print-sign-grid">
-                    <div className="print-sign-box">
-                      <div className="role">기록자</div>
-                      <div className="body">
-                        {renderSignature(previewNote.writer_signature_data, previewNote.writer_signature_type)}
-                        <div className="name">{previewNote.writer_name || '-'}</div>
-                        <div className="time">{toDateTimeMinuteString(previewNote.created_at) || '-'}</div>
-                      </div>
+                  <div className="print-sign-box">
+                    <div className="role">확인자</div>
+                    <div className="body">
+                      {renderSignature(previewNote.checker_signature_data, previewNote.checker_signature_type)}
+                      <div className="name">{previewNote.checker_name || '-'}</div>
+                      <div className="time">{toDateTimeMinuteString(previewNote.checker_signed_at) || '-'}</div>
                     </div>
-                    <div className="print-sign-box">
-                      <div className="role">확인자</div>
-                      <div className="body">
-                        {renderSignature(previewNote.checker_signature_data, previewNote.checker_signature_type)}
-                        <div className="name">{previewNote.checker_name || '-'}</div>
-                        <div className="time">{toDateTimeMinuteString(previewNote.checker_signed_at) || '-'}</div>
-                      </div>
-                    </div>
-                    <div className="print-sign-box">
-                      <div className="role">점검자</div>
-                      <div className="body">
-                        {renderSignature(previewNote.reviewer_signature_data, previewNote.reviewer_signature_type)}
-                        <div className="name">{previewNote.reviewer_name || '-'}</div>
-                        <div className="time">{toDateTimeMinuteString(previewNote.reviewer_signed_at) || '-'}</div>
-                      </div>
+                  </div>
+                  <div className="print-sign-box">
+                    <div className="role">점검자</div>
+                    <div className="body">
+                      {renderSignature(previewNote.reviewer_signature_data, previewNote.reviewer_signature_type)}
+                      <div className="name">{previewNote.reviewer_name || '-'}</div>
+                      <div className="time">{toDateTimeMinuteString(previewNote.reviewer_signed_at) || '-'}</div>
                     </div>
                   </div>
                 </div>
+              </div>
 
-                <div className="print-section">
-                  <div className="print-section-head">금주 연구 목표</div>
-                  <div className="print-section-body" style={{ whiteSpace: 'pre-line' }}>{previewNote.weekly_goal || '-'}</div>
-                </div>
-
-                {SHOW_ATTACHMENTS_UI && (
-                  <div style={{ marginBottom: 16 }}>
-                    <div style={{ fontWeight: 700, marginBottom: 8 }}>첨부파일</div>
-                    {previewNote.attachments && previewNote.attachments.length > 0 ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        {previewNote.attachments.map((att) => (
-                          <div key={att.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <span>{att.file_name}</span>
-                            <button
-                              className="secondary-btn"
-                              style={{ fontSize: 11, padding: '2px 8px' }}
-                              onClick={(e) => handleDownload(e, previewNote.id, att.id)}
-                            >
-                              다운로드
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    ) : previewNote.attachment_name ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span>{previewNote.attachment_name}</span>
-                        {previewNote.attachment_data && (
+              {SHOW_ATTACHMENTS_UI && (
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontWeight: 700, marginBottom: 8 }}>첨부파일</div>
+                  {previewNote.attachments && previewNote.attachments.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {previewNote.attachments.map((att) => (
+                        <div key={att.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span>{att.file_name}</span>
                           <button
                             className="secondary-btn"
                             style={{ fontSize: 11, padding: '2px 8px' }}
-                            onClick={(e) => handleDownload(e, previewNote.id)}
+                            onClick={(e) => handleDownload(e, previewNote.id, att.id)}
                           >
                             다운로드
                           </button>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="muted" style={{ fontSize: 12 }}>(첨부 없음)</div>
-                    )}
-                  </div>
-                )}
-
-                <table className="print-content-table">
-                  <thead>
-                    <tr>
-                      <th>금주 연구 내용</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="print-content-body">
-                        <div className="ql-snow">
-                          <div
-                            className="ql-editor"
-                            dangerouslySetInnerHTML={{
-                              __html: normalizeContentHtml(previewNote.content || ''),
-                            }}
-                          />
                         </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                      ))}
+                    </div>
+                  ) : previewNote.attachment_name ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span>{previewNote.attachment_name}</span>
+                      {previewNote.attachment_data && (
+                        <button
+                          className="secondary-btn"
+                          style={{ fontSize: 11, padding: '2px 8px' }}
+                          onClick={(e) => handleDownload(e, previewNote.id)}
+                        >
+                          다운로드
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="muted" style={{ fontSize: 12 }}>(첨부 없음)</div>
+                  )}
+                </div>
+              )}
 
-              </div>
-              <div className="modal-actions">
-                <button className="secondary-btn" onClick={() => setPreviewNote(null)}>닫기</button>
-                <button className="primary-btn" onClick={() => window.print()}>브라우저 인쇄</button>
-              </div>
+              <table className="print-content-table">
+                <thead>
+                  <tr>
+                    <th>금주 연구 내용</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="print-content-body">
+                      <div className="ql-snow">
+                        <div
+                          className="ql-editor"
+                          dangerouslySetInnerHTML={{
+                            __html: normalizeContentHtml(previewNote.content || ''),
+                          }}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+            </div>
+            <div className="modal-actions">
+              <button className="secondary-btn" onClick={() => setPreviewNote(null)}>닫기</button>
+              <button className="primary-btn" onClick={() => window.print()}>브라우저 인쇄</button>
             </div>
           </div>
-        )
-      }
+        </div>
+      )}
 
       {/* 수정 모달 */}
-      {
-        editingNote && (
-          <div className="modal-overlay" onClick={() => setEditingNote(null)}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
-              <div className="card-header">
-                <h2>연구노트 수정</h2>
-                <span className="muted">{editingNote.serial_no}</span>
-              </div>
-              <div className="card-body">
-                <div className="note-form-container">
-                  <div className="form-section">
-                    {editingMode === 'admin' && (
-                      <div className="form-grid">
-                        <div className="form-group col-6">
-                          <label>기록일자</label>
-                          <DatePicker selected={editRecordDate} onChange={setEditRecordDate} dateFormat="yyyy-MM-dd" locale="ko" className="input" />
-                        </div>
-                        <div className="form-group col-3">
-                          <label>보고 연도</label>
-                          <input className="input" value={editReportYear} onChange={(e) => setEditReportYear(e.target.value)} />
-                        </div>
-                        <div className="form-group col-3">
-                          <label>주차</label>
-                          <input className="input" value={editReportWeek} onChange={(e) => setEditReportWeek(e.target.value)} />
-                        </div>
-                        <div className="form-group col-12">
-                          <label>문서 번호</label>
-                          <input className="input" value={editSerialNo} onChange={(e) => setEditSerialNo(e.target.value)} />
-                        </div>
-                        <div className="form-group col-12">
-                          <label>작성자</label>
-                          <div className="input" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                            <span style={{ fontWeight: 600 }}>{editingNote.writer_name}</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+      {editingNote && (
+        <div className="modal-overlay" onClick={() => setEditingNote(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="card-header">
+              <h2>연구노트 수정</h2>
+              <span className="muted">{editingNote.serial_no}</span>
+            </div>
+            <div className="card-body">
+              <div className="note-form-container">
+                <div className="form-section">
+                  {editingMode === 'admin' && (
                     <div className="form-grid">
+                      <div className="form-group col-6">
+                        <label>기록일자</label>
+                        <DatePicker selected={editRecordDate} onChange={setEditRecordDate} dateFormat="yyyy-MM-dd" locale="ko" className="input" />
+                      </div>
+                      <div className="form-group col-3">
+                        <label>보고 연도</label>
+                        <input className="input" value={editReportYear} onChange={(e) => setEditReportYear(e.target.value)} />
+                      </div>
+                      <div className="form-group col-3">
+                        <label>주차</label>
+                        <input className="input" value={editReportWeek} onChange={(e) => setEditReportWeek(e.target.value)} />
+                      </div>
                       <div className="form-group col-12">
-                        <label>보고 제목</label>
-                        <input className="input" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
+                        <label>문서 번호</label>
+                        <input className="input" value={editSerialNo} onChange={(e) => setEditSerialNo(e.target.value)} />
                       </div>
-                      <div className="form-group col-6">
-                        <label>시작일</label>
-                        <DatePicker selected={editPeriodStart} onChange={setEditPeriodStart} dateFormat="yyyy-MM-dd" locale="ko" className="input" />
-                      </div>
-                      <div className="form-group col-6">
-                        <label>종료일</label>
-                        <DatePicker selected={editPeriodEnd} onChange={setEditPeriodEnd} dateFormat="yyyy-MM-dd" locale="ko" className="input" />
+                      <div className="form-group col-12">
+                        <label>작성자</label>
+                        <div className="input" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                          <span style={{ fontWeight: 600 }}>{editingNote.writer_name}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="form-section">
-                    <div className="form-group">
-                      <label>금주 목표</label>
-                      <input className="input" value={editWeeklyGoal} onChange={(e) => setEditWeeklyGoal(e.target.value)} />
+                  )}
+                  <div className="form-grid">
+                    <div className="form-group col-12">
+                      <label>보고 제목</label>
+                      <input className="input" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
                     </div>
-                    <div className="form-group">
-                      <label>연구/업무 내용</label>
-                      <RichTextEditor
-                        value={editContent}
-                        onChange={setEditContent}
-                        placeholder="연구/업무 내용을 수정하세요."
-                      />
+                    <div className="form-group col-6">
+                      <label>시작일</label>
+                      <DatePicker selected={editPeriodStart} onChange={setEditPeriodStart} dateFormat="yyyy-MM-dd" locale="ko" className="input" />
                     </div>
-                    {SHOW_ATTACHMENTS_UI && (
-                      <div className="form-group">
-                        <label>첨부파일 변경 (선택)</label>
-                        <input
-                          type="file"
-                          className="input"
-                          ref={editFileInputRef}
-                          multiple
-                          onChange={(e) => setEditAttachments(Array.from(e.target.files || []))}
-                        />
-                        {(editingNote.attachments && editingNote.attachments.length > 0) && !editAttachments.length && (
-                          <div style={{ marginTop: 4, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                            {editingNote.attachments.map((att) => (
-                              <div key={att.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <span className="muted" style={{ fontSize: 12 }}>{att.file_name}</span>
-                                <button
-                                  className="ghost-btn"
-                                  style={{ fontSize: 11, padding: '2px 6px' }}
-                                  onClick={(e) => handleDownload(e, editingNote.id, att.id)}
-                                >
-                                  다운로드
-                                </button>
-                              </div>
-                            ))}
-                            {editFileDeleted ? (
-                              <span className="deleted-file-text">삭제 예정: 기존 첨부파일 {editingNote.attachments.length}개</span>
-                            ) : (
-                              <button className="file-del-btn" onClick={() => setEditFileDeleted(true)}>기존 첨부 모두 삭제</button>
-                            )}
-                          </div>
-                        )}
-                        {editFileDeleted && !editAttachments.length && (
-                          <button className="secondary-btn" style={{ marginTop: 4, padding: '2px 6px', fontSize: 11 }} onClick={() => setEditFileDeleted(false)}>삭제 취소</button>
-                        )}
-                        {editAttachments.length > 0 && (
-                          <div className="muted" style={{ fontSize: 12, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                            {editAttachments.map((f) => (
-                              <span key={f.name}>추가 예정: {f.name}</span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
+                    <div className="form-group col-6">
+                      <label>종료일</label>
+                      <DatePicker selected={editPeriodEnd} onChange={setEditPeriodEnd} dateFormat="yyyy-MM-dd" locale="ko" className="input" />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="modal-actions">
-                <button className="secondary-btn" onClick={() => setEditingNote(null)}>취소</button>
-                <button className="primary-btn" onClick={handleUpdateNote}>수정사항 저장</button>
-              </div>
-            </div>
-          </div>
-        )
-      }
 
-      {
-        deleteTargetId && (
-          <div className="modal-overlay" onClick={() => setDeleteTargetId(null)}>
-            <div className="modal-content mini" onClick={e => e.stopPropagation()}>
-              <h3>정말 삭제하시겠습니까?</h3>
-              <p className="muted">삭제된 연구노트는 복구할 수 없습니다.</p>
-              <div className="modal-actions">
-                <button className="secondary-btn" onClick={() => setDeleteTargetId(null)}>취소</button>
-                <button className="primary-btn" style={{ background: 'var(--danger)' }} onClick={confirmDelete}>삭제하기</button>
+                <div className="form-section">
+                  <div className="form-group">
+                    <label>금주 목표</label>
+                    <input className="input" value={editWeeklyGoal} onChange={(e) => setEditWeeklyGoal(e.target.value)} />
+                  </div>
+                  <div className="form-group">
+                    <label>연구/업무 내용</label>
+                    <RichTextEditor
+                      value={editContent}
+                      onChange={setEditContent}
+                      placeholder="연구/업무 내용을 수정하세요."
+                    />
+                  </div>
+                  {SHOW_ATTACHMENTS_UI && (
+                    <div className="form-group">
+                      <label>첨부파일 변경 (선택)</label>
+                      <input
+                        type="file"
+                        className="input"
+                        ref={editFileInputRef}
+                        multiple
+                        onChange={(e) => setEditAttachments(Array.from(e.target.files || []))}
+                      />
+                      {(editingNote.attachments && editingNote.attachments.length > 0) && !editAttachments.length && (
+                        <div style={{ marginTop: 4, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {editingNote.attachments.map((att) => (
+                            <div key={att.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <span className="muted" style={{ fontSize: 12 }}>{att.file_name}</span>
+                              <button
+                                className="ghost-btn"
+                                style={{ fontSize: 11, padding: '2px 6px' }}
+                                onClick={(e) => handleDownload(e, editingNote.id, att.id)}
+                              >
+                                다운로드
+                              </button>
+                            </div>
+                          ))}
+                          {editFileDeleted ? (
+                            <span className="deleted-file-text">삭제 예정: 기존 첨부파일 {editingNote.attachments.length}개</span>
+                          ) : (
+                            <button className="file-del-btn" onClick={() => setEditFileDeleted(true)}>기존 첨부 모두 삭제</button>
+                          )}
+                        </div>
+                      )}
+                      {editFileDeleted && !editAttachments.length && (
+                        <button className="secondary-btn" style={{ marginTop: 4, padding: '2px 6px', fontSize: 11 }} onClick={() => setEditFileDeleted(false)}>삭제 취소</button>
+                      )}
+                      {editAttachments.length > 0 && (
+                        <div className="muted" style={{ fontSize: 12, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          {editAttachments.map((f) => (
+                            <span key={f.name}>추가 예정: {f.name}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
+            <div className="modal-actions">
+              <button className="secondary-btn" onClick={() => setEditingNote(null)}>취소</button>
+              <button className="primary-btn" onClick={handleUpdateNote}>수정사항 저장</button>
+            </div>
           </div>
-        )
-      }
+        </div>,
+        document.body
+      )}
+
+      {deleteTargetId && (
+        <div className="modal-overlay" onClick={() => setDeleteTargetId(null)}>
+          <div className="modal-content mini" onClick={e => e.stopPropagation()}>
+            <h3>정말 삭제하시겠습니까?</h3>
+            <p className="muted">삭제된 연구노트는 복구할 수 없습니다.</p>
+            <div className="modal-actions">
+              <button className="secondary-btn" onClick={() => setDeleteTargetId(null)}>취소</button>
+              <button className="primary-btn" style={{ background: 'var(--danger)' }} onClick={confirmDelete}>삭제하기</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div >
   );
 }
