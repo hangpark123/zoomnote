@@ -1,4 +1,4 @@
-body {
+﻿body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -10,4 +10,111 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* Default size option (12px when no size is selected) */
+.ql-picker.ql-size .ql-picker-label:not([data-value])::before,
+.ql-picker.ql-size .ql-picker-item:not([data-value])::before {
+  content: '12px (기본)' !important;
+}
+
+/* Font Size Dropdown Labels */
+.ql-picker.ql-size .ql-picker-item[data-value="8px"]::before,
+.ql-picker.ql-size .ql-picker-label[data-value="8px"]::before {
+  content: "8px" !important;
+}
+
+.ql-picker.ql-size .ql-picker-item[data-value="10px"]::before,
+.ql-picker.ql-size .ql-picker-label[data-value="10px"]::before {
+  content: "10px" !important;
+}
+
+.ql-picker.ql-size .ql-picker-item[data-value="14px"]::before,
+.ql-picker.ql-size .ql-picker-label[data-value="14px"]::before {
+  content: "14px" !important;
+}
+
+.ql-picker.ql-size .ql-picker-item[data-value="16px"]::before,
+.ql-picker.ql-size .ql-picker-label[data-value="16px"]::before {
+  content: "16px" !important;
+}
+
+.ql-picker.ql-size .ql-picker-item[data-value="18px"]::before,
+.ql-picker.ql-size .ql-picker-label[data-value="18px"]::before {
+  content: "18px" !important;
+}
+
+.ql-picker.ql-size .ql-picker-item[data-value="20px"]::before,
+.ql-picker.ql-size .ql-picker-label[data-value="20px"]::before {
+  content: "20px" !important;
+}
+
+.ql-picker.ql-size .ql-picker-item[data-value="22px"]::before,
+.ql-picker.ql-size .ql-picker-label[data-value="22px"]::before {
+  content: "22px" !important;
+}
+
+.ql-picker.ql-size .ql-picker-item[data-value="24px"]::before,
+.ql-picker.ql-size .ql-picker-label[data-value="24px"]::before {
+  content: "24px" !important;
+}
+
+.ql-picker.ql-size .ql-picker-item[data-value="28px"]::before,
+.ql-picker.ql-size .ql-picker-label[data-value="28px"]::before {
+  content: "28px" !important;
+}
+
+.ql-picker.ql-size .ql-picker-item[data-value="32px"]::before,
+.ql-picker.ql-size .ql-picker-label[data-value="32px"]::before {
+  content: "32px" !important;
+}
+
+.ql-picker.ql-size .ql-picker-item[data-value="36px"]::before,
+.ql-picker.ql-size .ql-picker-label[data-value="36px"]::before {
+  content: "36px" !important;
+}
+
+.ql-picker.ql-size .ql-picker-item[data-value="48px"]::before,
+.ql-picker.ql-size .ql-picker-label[data-value="48px"]::before {
+  content: "48px" !important;
+}
+
+/* ===== Quill Editor UI Improvements ===== */
+.ql-toolbar {
+  border: 1px solid #d1d5db;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  background: #f9fafb;
+  padding: 8px;
+}
+
+.ql-container {
+  border: 1px solid #d1d5db;
+  border-top: none;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  min-height: 300px;
+  font-size: 16px;
+}
+
+.ql-editor {
+  min-height: 280px;
+  padding: 16px;
+  line-height: 1.6;
+}
+
+.ql-editor::before {
+  color: #9ca3af;
+  font-style: normal;
+}
+
+/* Toolbar button hover effects */
+.ql-toolbar button:hover,
+.ql-toolbar .ql-picker-label:hover {
+  color: #2563eb !important;
+}
+
+.ql-toolbar button.ql-active,
+.ql-toolbar .ql-picker-label.ql-active {
+  color: #2563eb !important;
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 const styles = {
   page: {
@@ -65,29 +65,29 @@ const styles = {
 export const ResearchNote = ({ user, date }) => {
   if (!user) return null;
 
-  // ★ [핵심 로직] 이름 / 직함 / 부서 순서로 조립
-  // 1. 배열에 [이름, 직함, 부서] 순서대로 담습니다.
-  // 2. filter(Boolean): 값이 비어있거나 null인 항목은 자동으로 뺍니다. (슬래시 겹침 방지)
-  // 3. join(" / "): 남은 항목들 사이사이에만 " / "를 넣습니다.
+  // ??[?듭떖 濡쒖쭅] ?대쫫 / 吏곹븿 / 遺???쒖꽌濡?議곕┰
+  // 1. 諛곗뿴??[?대쫫, 吏곹븿, 遺?? ?쒖꽌?濡??댁뒿?덈떎.
+  // 2. filter(Boolean): 媛믪씠 鍮꾩뼱?덇굅??null????ぉ? ?먮룞?쇰줈 類띾땲?? (?щ옒??寃뱀묠 諛⑹?)
+  // 3. join(" / "): ?⑥? ??ぉ???ъ씠?ъ씠?먮쭔 " / "瑜??ｌ뒿?덈떎.
   
-  // 예시 상황:
-  // - 이름: 박민수, 직함: 사원, 부서: 신사업개발부  -> "박민수 / 사원 / 신사업개발부"
-  // - 이름: 이지훈, 직함: (없음), 부서: 개발1부 2팀 -> "이지훈 / 개발1부 2팀" (슬래시가 1개만 생김)
+  // ?덉떆 ?곹솴:
+  // - ?대쫫: 諛뺣??? 吏곹븿: ?ъ썝, 遺?? ?좎궗?낃컻諛쒕?  -> "諛뺣???/ ?ъ썝 / ?좎궗?낃컻諛쒕?"
+  // - ?대쫫: ?댁??? 吏곹븿: (?놁쓬), 遺?? 媛쒕컻1遺 2? -> "?댁???/ 媛쒕컻1遺 2?" (?щ옒?쒓? 1媛쒕쭔 ?앷?)
   
   const userInfoStr = [user.name, user.job_title, user.department]
-    .filter(Boolean) // 빈 값(null, undefined, "") 제거
+    .filter(Boolean) // 鍮?媛?null, undefined, "") ?쒓굅
     .join(" / "); 
 
   return (
     <div className="print-container" style={styles.page}>
       
-      {/* 1. 헤더 */}
+      {/* 1. ?ㅻ뜑 */}
       <div style={styles.headerBox}>
-        <div style={styles.title}>연 구 노 트</div>
-        <div style={styles.subTitle}>아이알링크(주) 정보통신연구소 연구원 연구노트</div>
+        <div style={styles.title}>??援?????/div>
+        <div style={styles.subTitle}>?꾩씠?뚮쭅??二? ?뺣낫?듭떊?곌뎄???곌뎄???곌뎄?명듃</div>
       </div>
 
-      {/* 2. 결재란 */}
+      {/* 2. 寃곗옱? */}
       <table style={styles.table}>
         <colgroup>
           <col style={{ width: '15%' }} />
@@ -96,44 +96,44 @@ export const ResearchNote = ({ user, date }) => {
         </colgroup>
         <thead>
           <tr>
-            <th style={styles.th}>구분</th>
-            <th style={styles.th}>기록자</th>
-            <th style={styles.th}>확인자 / 점검자</th>
+            <th style={styles.th}>援щ텇</th>
+            <th style={styles.th}>湲곕줉??/th>
+            <th style={styles.th}>?뺤씤??/ ?먭???/th>
           </tr>
         </thead>
         <tbody>
-          {/* 서명 행 */}
+          {/* ?쒕챸 ??*/}
           <tr>
-            <td style={styles.tdCenter}><strong>서명</strong></td>
+            <td style={styles.tdCenter}><strong>?쒕챸</strong></td>
             <td style={styles.tdCenter}>
               <div style={styles.signatureBox}>
-                {/* ▼ 조립된 문자열(userInfoStr) 출력 */}
+                {/* ??議곕┰??臾몄옄??userInfoStr) 異쒕젰 */}
                 <div style={{ marginBottom: '5px', fontWeight: 'bold', fontSize: '14px' }}>
                   {userInfoStr}
                 </div>
-                <div style={{ fontStyle: 'italic', color: '#ccc' }}>(서명)</div>
+                <div style={{ fontStyle: 'italic', color: '#ccc' }}>(?쒕챸)</div>
               </div>
             </td>
             <td style={styles.tdCenter}>
               <div style={styles.signatureBox}>
-                <span style={{ color: '#ccc' }}>(서명)</span>
+                <span style={{ color: '#ccc' }}>(?쒕챸)</span>
               </div>
             </td>
           </tr>
-          {/* 서명 일자 행 */}
+          {/* ?쒕챸 ?쇱옄 ??*/}
           <tr>
-            <td style={styles.tdCenter}><strong>서명 일자</strong></td>
+            <td style={styles.tdCenter}><strong>?쒕챸 ?쇱옄</strong></td>
             <td style={styles.tdCenter}>
               {date}
             </td>
             <td style={styles.tdCenter}>
-              {/* 공란 */}
+              {/* 怨듬? */}
             </td>
           </tr>
         </tbody>
       </table>
 
-      {/* 3. 연구 개요 정보 */}
+      {/* 3. ?곌뎄 媛쒖슂 ?뺣낫 */}
       <table style={styles.table}>
         <colgroup>
           <col style={{ width: '15%' }} />
@@ -143,61 +143,61 @@ export const ResearchNote = ({ user, date }) => {
         </colgroup>
         <tbody>
           <tr>
-            <td style={styles.th}>보고주차</td>
-            <td style={styles.td}>2025년 12월 2주차</td>
-            <td style={styles.th}>일련번호</td>
+            <td style={styles.th}>蹂닿퀬二쇱감</td>
+            <td style={styles.td}>2025??12??2二쇱감</td>
+            <td style={styles.th}>?쇰젴踰덊샇</td>
             <td style={styles.td}>2025-12-001</td>
           </tr>
           <tr>
-            <td style={styles.th}>기록일자</td>
+            <td style={styles.th}>湲곕줉?쇱옄</td>
             <td style={styles.td}>{date}</td>
-            <td style={styles.th}>기록자</td>
-            {/* ▼ 여기도 똑같이 적용 */}
+            <td style={styles.th}>湲곕줉??/td>
+            {/* ???ш린???묎컳???곸슜 */}
             <td style={styles.td}>{userInfoStr}</td>
           </tr>
           <tr>
-            <td style={styles.th}>연구제목</td>
+            <td style={styles.th}>?곌뎄?쒕ぉ</td>
             <td colSpan="3" style={styles.td}>
-             Zoom API 기반 자동화 시스템 고도화
+             Zoom API 湲곕컲 ?먮룞???쒖뒪??怨좊룄??
             </td>
           </tr>
           <tr>
-            <td style={styles.th}>연구기간</td>
+            <td style={styles.th}>?곌뎄湲곌컙</td>
             <td colSpan="3" style={styles.td}>2025.01.01 ~ 2025.12.31</td>
           </tr>
           <tr>
-            <td style={styles.th}>금주목표</td>
+            <td style={styles.th}>湲덉＜紐⑺몴</td>
             <td colSpan="3" style={styles.td}>
-               부서별 데이터 연동 및 출력 레이아웃 최적화
+               遺?쒕퀎 ?곗씠???곕룞 諛?異쒕젰 ?덉씠?꾩썐 理쒖쟻??
             </td>
           </tr>
         </tbody>
       </table>
 
-      {/* 4. 연구 내용 */}
+      {/* 4. ?곌뎄 ?댁슜 */}
       <div style={styles.contentBox}>
-        <h4 style={{ margin: '0 0 15px 0', borderBottom: '1px solid #ddd', paddingBottom: '5px' }}>■ 연구 내용</h4>
+        <h4 style={{ margin: '0 0 15px 0', borderBottom: '1px solid #ddd', paddingBottom: '5px' }}>???곌뎄 ?댁슜</h4>
         <div style={{ lineHeight: '1.8' }}>
-          <p>1. <strong>Zoom API 연동 데이터 확장</strong></p>
+          <p>1. <strong>Zoom API ?곕룞 ?곗씠???뺤옣</strong></p>
           <ul style={{ listStyleType: 'circle', marginLeft: '20px' }}>
-            <li>API 응답 데이터에서 <code>job_title</code> 필드 추출 및 UI 반영</li>
-            <li>결재란 서명 일자 행 추가 및 자동 기입 로직 구현</li>
+            <li>API ?묐떟 ?곗씠?곗뿉??<code>job_title</code> ?꾨뱶 異붿텧 諛?UI 諛섏쁺</li>
+            <li>寃곗옱? ?쒕챸 ?쇱옄 ??異붽? 諛??먮룞 湲곗엯 濡쒖쭅 援ы쁽</li>
           </ul>
 
-          <p>2. <strong>연구노트 UI/UX 개선</strong></p>
+          <p>2. <strong>?곌뎄?명듃 UI/UX 媛쒖꽑</strong></p>
           <ul style={{ listStyleType: 'circle', marginLeft: '20px' }}>
-             <li>인쇄 시 레이아웃 깨짐 현상을 방지하기 위한 CSS 스타일링 적용</li>
-             <li>결재 라인 및 서명란 중앙 정렬 배치</li>
+             <li>?몄뇙 ???덉씠?꾩썐 源⑥쭚 ?꾩긽??諛⑹??섍린 ?꾪븳 CSS ?ㅽ??쇰쭅 ?곸슜</li>
+             <li>寃곗옱 ?쇱씤 諛??쒕챸? 以묒븰 ?뺣젹 諛곗튂</li>
           </ul>
           
           <p style={{ marginTop: '20px', color: '#999' }}>
-            (추가 작성 내용은 출력 후 수기로 기입 가능)
+            (異붽? ?묒꽦 ?댁슜? 異쒕젰 ???섍린濡?湲곗엯 媛??
           </p>
         </div>
       </div>
       
       <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '14px' }}>
-        위와 같이 연구노트를 기록함.
+        ?꾩? 媛숈씠 ?곌뎄?명듃瑜?湲곕줉??
       </div>
     </div>
   );
