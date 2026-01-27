@@ -1963,13 +1963,13 @@ function App() {
 
               <div className="vacation-box" style={{ marginTop: 8 }}>
                 <div className="vacation-box-header">
-                  <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                    <div style={{ fontWeight: 700 }}>주차 휴가자 설정</div>
-                    <span className="muted" style={{ fontSize: 12 }}>
+                  <div className="box-title-row">
+                    <div className="box-title">주차 휴가자 설정</div>
+                    <span className="muted box-meta">
                       {adminVacationDirty ? '변경사항 있음' : '저장됨'}
                     </span>
                   </div>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <div className="box-actions">
                     <button
                       className="primary-btn"
                       style={{ padding: '6px 10px', display: adminVacationOpen ? 'inline-flex' : 'none' }}
@@ -2022,20 +2022,22 @@ function App() {
               {adminMissing.length > 0 && (
                 <div className="missing-box">
                   <div className="vacation-box-header">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div className="missing-box-title">주차 누락자 목록</div>
-                      <span className="muted" style={{ fontSize: 12 }}>
+                    <div className="box-title-row">
+                      <div className="box-title">주차 누락자 목록</div>
+                      <span className="muted box-meta">
                         (총 {adminMissing.length}명)
                       </span>
                     </div>
-                    <button
-                      type="button"
-                      className="secondary-btn"
-                      style={{ padding: '6px 10px' }}
-                      onClick={() => setAdminMissingOpen((v) => !v)}
-                    >
-                      {adminMissingOpen ? '접기' : '펼치기'}
-                    </button>
+                    <div className="box-actions">
+                      <button
+                        type="button"
+                        className="secondary-btn"
+                        style={{ padding: '6px 10px' }}
+                        onClick={() => setAdminMissingOpen((v) => !v)}
+                      >
+                        {adminMissingOpen ? '접기' : '펼치기'}
+                      </button>
+                    </div>
                   </div>
 
                   {adminMissingOpen && (

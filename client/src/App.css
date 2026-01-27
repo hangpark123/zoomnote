@@ -1466,7 +1466,9 @@ canvas {
     overflow: visible;
     height: auto;
     display: block;
-    border: none;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
     padding: 32px;
     transform: none;
     background: #ffffff;
@@ -1581,6 +1583,28 @@ canvas {
   margin-bottom: 8px;
 }
 
+.box-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.box-title {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-main);
+}
+
+.box-meta {
+  font-size: 12px;
+}
+
+.box-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .vacation-grid {
   display: flex;
   flex-wrap: wrap;
@@ -1614,10 +1638,6 @@ canvas {
   margin-top: 8px;
 }
 
-.missing-box-title {
-  font-weight: 700;
-  color: var(--text-main);
-}
 
 /* Git?먯꽌 媛?몄삩 ?ㅽ겕紐⑤뱶 ?ㅽ???*/
 
@@ -1781,10 +1801,6 @@ canvas {
 [data-theme='dark'] .missing-box {
   background: var(--surface-color);
   border-color: var(--border-color);
-}
-
-[data-theme='dark'] .missing-box-title {
-  color: var(--text-main);
 }
 
 [data-theme='dark'] .missing-user-badge {
