@@ -250,7 +250,7 @@ function App() {
 
   // User Template (고정값 저장 기능)
   const [userTemplate, setUserTemplate] = useState(null);
-  const [hasTemplate, setHasTemplate] = useState(false);
+  const [hasTemplate, setHasTemplate] = useState(true); // ⚠️ 디버깅용: 강제로 true 설정
 
   // Edit Form States
   const [editingMode, setEditingMode] = useState('self');
@@ -987,6 +987,9 @@ function App() {
 
   // [고정값 해제]
   const handleClearTemplate = async () => {
+    // ⚠️ 디버깅용: 버튼 클릭 확인
+    alert('🔓 고정값 해제 버튼이 클릭되었습니다!');
+
     // 서버 로그 전송 (디버깅용)
     try {
       await fetch('/api/client-log', {
