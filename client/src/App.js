@@ -885,8 +885,11 @@ function App() {
   };
 
   // [고정값 저장/해제 기능] 사용자 template 불러오기
+  // me 객체의 참조값이 변경되어도 ID가 같으면 재실행하지 않도록 수정
+  const myId = me?.id || me?.zoom_user_id;
+
   React.useEffect(() => {
-    if (!me) return;
+    if (!myId) return;
 
     const fetchTemplate = async () => {
       try {
@@ -912,7 +915,7 @@ function App() {
     };
 
     fetchTemplate();
-  }, [me]);
+  }, [myId]);
 
   // [고정값 저장]
   const handleSaveTemplate = async () => {
@@ -1713,8 +1716,11 @@ function App() {
                             <label style={{ margin: 0 }}>보고 제목</label>
                             {!hasTemplate ? (
                               <span
-                                onMouseDown={(e) => { e.preventDefault(); handleSaveTemplate(); }}
-                                onClick={handleSaveTemplate}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleSaveTemplate();
+                                }}
                                 style={{
                                   padding: '2px 8px',
                                   fontSize: '11px',
@@ -1732,8 +1738,11 @@ function App() {
                               </span>
                             ) : (
                               <span
-                                onMouseDown={(e) => { e.preventDefault(); handleClearTemplate(); }}
-                                onClick={handleClearTemplate}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleClearTemplate();
+                                }}
                                 style={{
                                   padding: '2px 8px',
                                   fontSize: '11px',
