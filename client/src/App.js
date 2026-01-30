@@ -250,7 +250,7 @@ function App() {
 
   // User Template (고정값 저장 기능)
   const [userTemplate, setUserTemplate] = useState(null);
-  const [hasTemplate, setHasTemplate] = useState(true); // ⚠️ 디버깅용: 강제로 true 설정
+  const [hasTemplate, setHasTemplate] = useState(false);
 
   // Edit Form States
   const [editingMode, setEditingMode] = useState('self');
@@ -890,27 +890,9 @@ function App() {
 
     const fetchTemplate = async () => {
       try {
-        // 서버 로그: template 불러오기 시작
-        await fetch('/api/client-log', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'fetch-template-start', user: me.name })
-        }).catch(() => { });
-
         const res = await fetch('/api/user/template', { credentials: 'include' });
         if (!res.ok) throw new Error('고정값 불러오기 실패');
         const data = await res.json();
-
-        // 서버 로그: template 데이터 확인
-        await fetch('/api/client-log', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'fetch-template-result',
-            hasData: !!(data.title || data.start_date || data.end_date),
-            data: data
-          })
-        }).catch(() => { });
 
         if (data.title || data.start_date || data.end_date) {
           setUserTemplate(data);
@@ -920,33 +902,12 @@ function App() {
           if (data.title) setTitle(data.title);
           if (data.start_date) setPeriodStart(new Date(data.start_date));
           if (data.end_date) setPeriodEnd(new Date(data.end_date));
-
-          // 서버 로그: hasTemplate = true 설정됨
-          await fetch('/api/client-log', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'template-loaded-hasTemplate-true' })
-          }).catch(() => { });
         } else {
           setUserTemplate(null);
           setHasTemplate(false);
-
-          // 서버 로그: hasTemplate = false 설정됨
-          await fetch('/api/client-log', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'template-loaded-hasTemplate-false' })
-          }).catch(() => { });
         }
       } catch (e) {
         console.error('고정값 불러오기 에러:', e);
-
-        // 서버 로그: 에러 발생
-        await fetch('/api/client-log', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'fetch-template-error', error: e.message })
-        }).catch(() => { });
       }
     };
 
@@ -987,34 +948,7 @@ function App() {
 
   // [고정값 해제]
   const handleClearTemplate = async () => {
-    // ⚠️ 디버깅용: 버튼 클릭 확인
-    alert('🔓 고정값 해제 버튼이 클릭되었습니다!');
-
-    // 서버 로그 전송 (디버깅용)
-    try {
-      await fetch('/api/client-log', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'template-clear-button-clicked',
-          timestamp: new Date().toISOString(),
-          hasTemplate: hasTemplate,
-          userTemplate: userTemplate
-        })
-      });
-    } catch (e) { /* 로그 실패는 무시 */ }
-
-    if (!window.confirm('저장된 고정값을 해제하시겠습니까?')) {
-      // 취소 시에도 로그
-      try {
-        await fetch('/api/client-log', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'template-clear-cancelled' })
-        });
-      } catch (e) { /* 로그 실패는 무시 */ }
-      return;
-    }
+    if (!window.confirm('저장된 고정값을 해제하시겠습니까?')) return;
 
     try {
       const res = await fetch('/api/user/template', {
@@ -1774,46 +1708,28 @@ function App() {
                         </div>
 
                         <div className="form-group col-12">
-                          <label>보고 제목</label>
-                          <input className="input" placeholder="예: 12월 3주차 주간 연구 보고" value={title} onChange={(e) => setTitle(e.target.value)} />
-
-                          {/* 고정값 버튼: input 아래, 오른쪽 정렬 */}
-                          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
-                            {!hasTemplate ? (
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                            <label style={{ margin: 0 }}>보고 제목</label>
+                            {hasTemplate && (
                               <button
                                 type="button"
-                                className="secondary-btn"
-                                onClick={handleSaveTemplate}
-                                onMouseDown={handleSaveTemplate}
-                                title="현재 입력한 제목, 시작일, 종료일을 고정값으로 저장합니다"
-                                style={{
-                                  padding: '4px 12px',
-                                  fontSize: '12px',
-                                  height: 'auto',
-                                  minHeight: 'auto'
-                                }}
-                              >
-                                📌 고정값 저장
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                className="danger-outline-btn"
                                 onClick={handleClearTemplate}
-                                onMouseDown={handleClearTemplate}
-                                onTouchStart={handleClearTemplate}
-                                title="저장된 고정값을 해제합니다"
                                 style={{
-                                  padding: '4px 12px',
-                                  fontSize: '12px',
-                                  height: 'auto',
-                                  minHeight: 'auto'
+                                  padding: '2px 8px',
+                                  fontSize: '11px',
+                                  background: '#ff6b6b',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '3px',
+                                  cursor: 'pointer'
                                 }}
+                                title="저장된 고정값을 해제합니다"
                               >
-                                🔓 고정값 해제
+                                🔓 해제
                               </button>
                             )}
                           </div>
+                          <input className="input" placeholder="예: 12월 3주차 주간 연구 보고" value={title} onChange={(e) => setTitle(e.target.value)} />
                         </div>
                         <div className="form-group col-6">
                           <label>시작일</label>
