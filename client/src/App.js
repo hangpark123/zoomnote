@@ -890,9 +890,27 @@ function App() {
 
     const fetchTemplate = async () => {
       try {
+        // 서버 로그: template 불러오기 시작
+        await fetch('/api/client-log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'fetch-template-start', user: me.name })
+        }).catch(() => { });
+
         const res = await fetch('/api/user/template', { credentials: 'include' });
         if (!res.ok) throw new Error('고정값 불러오기 실패');
         const data = await res.json();
+
+        // 서버 로그: template 데이터 확인
+        await fetch('/api/client-log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'fetch-template-result',
+            hasData: !!(data.title || data.start_date || data.end_date),
+            data: data
+          })
+        }).catch(() => { });
 
         if (data.title || data.start_date || data.end_date) {
           setUserTemplate(data);
@@ -902,12 +920,33 @@ function App() {
           if (data.title) setTitle(data.title);
           if (data.start_date) setPeriodStart(new Date(data.start_date));
           if (data.end_date) setPeriodEnd(new Date(data.end_date));
+
+          // 서버 로그: hasTemplate = true 설정됨
+          await fetch('/api/client-log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'template-loaded-hasTemplate-true' })
+          }).catch(() => { });
         } else {
           setUserTemplate(null);
           setHasTemplate(false);
+
+          // 서버 로그: hasTemplate = false 설정됨
+          await fetch('/api/client-log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'template-loaded-hasTemplate-false' })
+          }).catch(() => { });
         }
       } catch (e) {
         console.error('고정값 불러오기 에러:', e);
+
+        // 서버 로그: 에러 발생
+        await fetch('/api/client-log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'fetch-template-error', error: e.message })
+        }).catch(() => { });
       }
     };
 
