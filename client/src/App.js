@@ -1057,7 +1057,27 @@ function App() {
       if (!res.ok) throw new Error(data.error || `연구노트 저장 실패 (${res.status})`);
 
       setNotes((prev) => [data, ...prev]);
-      setTitle('');
+
+      // 작성 완료 후 초기화 (template이 있으면 고정값은 유지)
+      if (hasTemplate && userTemplate) {
+        setTitle(userTemplate.title || '');
+        // 날짜는 고정값 사용 (오늘 날짜가 아니어도 사용자 의도대로 템플릿 값 사용)
+        if (userTemplate.start_date) setPeriodStart(new Date(userTemplate.start_date));
+        if (userTemplate.end_date) setPeriodEnd(new Date(userTemplate.end_date));
+      } else {
+        setTitle('');
+        // 날짜는 초기화 X (보통 연속 작성 시 날짜 유지하는게 편할 수 있으나, 기존 로직은 유지되지 않는 것이었음. 
+        // 하지만 여기선 템플릿 없을 땐 리셋하는게 맞음. 사용자가 지적한건 '고정값을 못 가져오는' 문제니까)
+        // 기존 코드에서는 날짜 초기화 부분이 없었나? 파일 확인해보니 setTitle만 초기화하고 있음. 
+        // 아, setPeriodStart/End 초기화 코드는 안보였는데? 
+        // 다시 확인: 아까 내가 지운건 handleClearTemplate임. handleSave에는 날짜 초기화가 원래 없었나?
+        // view_file 결과(Step 5128)를 보면 setTitle만 있음. 날짜는 유지되었던 것 같음.
+        // 하지만 사용자가 "작성하고 다음주차에 작성할려고 보니 고정값을 못가져와"라고 했다면,
+        // 아마도 날짜나 제목을 새로 입력하고 저장했을 때, 다음 작성 시 빈칸이 되어야 하는데 
+        // 템플릿이 있다면 빈칸이 아니라 템플릿 값으로 채워져야 한다.
+
+        // 결론: 템플릿이 있으면 템플릿 값으로 리셋. 없으면 그냥 빈값(제목).
+      }
       setWeeklyGoal('');
       setContent('');
       setAttachmentFiles([]);
