@@ -248,6 +248,10 @@ function App() {
   const [content, setContent] = useState('');
   const [attachmentFiles, setAttachmentFiles] = useState([]);
 
+  // User Template (고정값 저장 기능)
+  const [userTemplate, setUserTemplate] = useState(null);
+  const [hasTemplate, setHasTemplate] = useState(false);
+
   // Edit Form States
   const [editingMode, setEditingMode] = useState('self');
   const [editRecordDate, setEditRecordDate] = useState(null);
@@ -877,6 +881,85 @@ function App() {
     // input 초기화: 같은 파일을 다시 선택하거나 리스트 관리를 위해 필요
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  };
+
+  // [고정값 저장/해제 기능] 사용자 template 불러오기
+  React.useEffect(() => {
+    if (!me) return;
+
+    const fetchTemplate = async () => {
+      try {
+        const res = await fetch('/api/user/template', { credentials: 'include' });
+        if (!res.ok) throw new Error('고정값 불러오기 실패');
+        const data = await res.json();
+
+        if (data.title || data.start_date || data.end_date) {
+          setUserTemplate(data);
+          setHasTemplate(true);
+
+          // 고정값이 있으면 자동으로 입력 필드에 채우기
+          if (data.title) setTitle(data.title);
+          if (data.start_date) setPeriodStart(new Date(data.start_date));
+          if (data.end_date) setPeriodEnd(new Date(data.end_date));
+        } else {
+          setUserTemplate(null);
+          setHasTemplate(false);
+        }
+      } catch (e) {
+        console.error('고정값 불러오기 에러:', e);
+      }
+    };
+
+    fetchTemplate();
+  }, [me]);
+
+  // [고정값 저장]
+  const handleSaveTemplate = async () => {
+    if (!title.trim()) {
+      alert('보고 제목을 입력해주세요.');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/user/template', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          title: title,
+          start_date: periodStart ? toDateString(periodStart) : null,
+          end_date: periodEnd ? toDateString(periodEnd) : null,
+        }),
+      });
+
+      if (!res.ok) throw new Error('고정값 저장 실패');
+      const data = await res.json();
+
+      alert(data.message || '고정값이 저장되었습니다.');
+      window.location.reload(); // 자동 새로고침
+    } catch (e) {
+      alert('고정값 저장 중 오류가 발생했습니다: ' + e.message);
+    }
+  };
+
+  // [고정값 해제]
+  const handleClearTemplate = async () => {
+    if (!window.confirm('저장된 고정값을 해제하시겠습니까?')) return;
+
+    try {
+      const res = await fetch('/api/user/template', {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!res.ok) throw new Error('고정값 해제 실패');
+      const data = await res.json();
+
+      alert(data.message || '고정값이 해제되었습니다.');
+      window.location.reload(); // 자동 새로고침
+    } catch (e) {
+      alert('고정값 해제 중 오류가 발생했습니다: ' + e.message);
     }
   };
 
@@ -1614,6 +1697,30 @@ function App() {
                           <label>문서 번호</label>
                           <input className="input readonly-hint" value="저장 시 자동 생성" readOnly />
                         </div>
+
+                        {/* 고정값 저장/해제 버튼 */}
+                        <div className="form-group col-12" style={{ marginTop: '-8px', marginBottom: '8px' }}>
+                          {!hasTemplate ? (
+                            <button
+                              type="button"
+                              className="secondary-btn"
+                              onClick={handleSaveTemplate}
+                              title="현재 입력한 제목, 시작일, 종료일을 고정값으로 저장합니다"
+                            >
+                              📌 고정값 저장
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="danger-outline-btn"
+                              onClick={handleClearTemplate}
+                              title="저장된 고정값을 해제합니다"
+                            >
+                              🔓 고정값 해제
+                            </button>
+                          )}
+                        </div>
+
                         <div className="form-group col-12">
                           <label>보고 제목</label>
                           <input className="input" placeholder="예: 12월 3주차 주간 연구 보고" value={title} onChange={(e) => setTitle(e.target.value)} />

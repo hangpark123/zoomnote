@@ -836,6 +836,61 @@ app.post('/api/my-signature', attachMe, async (req, res) => {
   } catch (e) { res.status(500).json({ error: 'Server error' }); }
 });
 
+// 사용자별 연구노트 고정값 조회
+app.get('/api/user/template', attachMe, async (req, res) => {
+  try {
+    const me = req.me;
+    const [rows] = await pool.query(
+      'SELECT template_title, template_start_date, template_end_date FROM users WHERE zoom_user_id = ? LIMIT 1',
+      [me.zoom_user_id]
+    );
+    const template = rows[0] || {};
+    res.json({
+      title: template.template_title || null,
+      start_date: template.template_start_date ? toDateStringSafe(template.template_start_date) : null,
+      end_date: template.template_end_date ? toDateStringSafe(template.template_end_date) : null,
+    });
+  } catch (e) {
+    console.error('GET /api/user/template error:', e.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// 사용자별 연구노트 고정값 저장
+app.post('/api/user/template', attachMe, async (req, res) => {
+  try {
+    const me = req.me;
+    const { title, start_date, end_date } = req.body;
+
+    await pool.query(
+      'UPDATE users SET template_title = ?, template_start_date = ?, template_end_date = ? WHERE zoom_user_id = ?',
+      [title || null, start_date || null, end_date || null, me.zoom_user_id]
+    );
+
+    res.json({ ok: true, message: '고정값이 저장되었습니다.' });
+  } catch (e) {
+    console.error('POST /api/user/template error:', e.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// 사용자별 연구노트 고정값 해제
+app.delete('/api/user/template', attachMe, async (req, res) => {
+  try {
+    const me = req.me;
+
+    await pool.query(
+      'UPDATE users SET template_title = NULL, template_start_date = NULL, template_end_date = NULL WHERE zoom_user_id = ?',
+      [me.zoom_user_id]
+    );
+
+    res.json({ ok: true, message: '고정값이 해제되었습니다.' });
+  } catch (e) {
+    console.error('DELETE /api/user/template error:', e.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 app.get('/api/me', attachMe, (req, res) => res.json(req.me));
 
 const encodeHtml = (txt) =>
