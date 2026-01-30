@@ -1709,7 +1709,7 @@ function App() {
 
                         <div className="form-group col-12">
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                            <label style={{ margin: 0 }}>보고 제목</label>
+                            <label style={{ margin: 0, flexShrink: 0, flexGrow: 0 }}>보고 제목</label>
                             {!hasTemplate ? (
                               <button
                                 type="button"
@@ -1722,7 +1722,9 @@ function App() {
                                   height: 'auto',
                                   minHeight: 'auto',
                                   position: 'relative',
-                                  zIndex: 10
+                                  zIndex: 100,
+                                  flexShrink: 0,
+                                  cursor: 'pointer'
                                 }}
                               >
                                 📌 고정값 저장
@@ -1739,7 +1741,9 @@ function App() {
                                   height: 'auto',
                                   minHeight: 'auto',
                                   position: 'relative',
-                                  zIndex: 10
+                                  zIndex: 100,
+                                  flexShrink: 0,
+                                  cursor: 'pointer'
                                 }}
                               >
                                 🔓 고정값 해제
