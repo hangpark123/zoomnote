@@ -948,33 +948,28 @@ function App() {
 
   // [고정값 해제]
   const handleClearTemplate = async () => {
-    alert('해제 버튼이 클릭되었습니다!'); // 디버깅: 클릭 확인
+    if (!window.confirm('저장된 고정값을 해제하시겠습니까? (현재 작성 중인 내용은 유지됩니다)')) return;
 
     try {
-      alert('DELETE API를 호출합니다...'); // 디버깅: API 호출 전
-
       const res = await fetch('/api/user/template', {
         method: 'DELETE',
         credentials: 'include',
       });
 
-      alert(`API 응답: ${res.status} ${res.statusText}`); // 디버깅: 응답 상태
-
       if (!res.ok) throw new Error('고정값 해제 실패');
       const data = await res.json();
 
-      alert('상태 업데이트 시작...'); // 디버깅: 상태 업데이트 전
+      // alert(data.message || '고정값이 해제되었습니다.'); // 너무 빈번한 alert 제거
 
-      // 상태 업데이트 (새로고침 대신)
+      // 상태만 업데이트 (화면 내용은 지우지 않음!)
       setUserTemplate(null);
       setHasTemplate(false);
-      setTitle('');
-      setPeriodStart(null);
-      setPeriodEnd(null);
-
-      alert(data.message || '고정값이 해제되었습니다.');
+      // setTitle(''); <--- 삭제: 작성 중인 내용 유지
+      // setPeriodStart(null); <--- 삭제
+      // setPeriodEnd(null); <--- 삭제
     } catch (e) {
-      alert('에러 발생: ' + e.message);
+      console.error('고정값 해제 실패:', e);
+      alert('오류가 발생했습니다: ' + e.message);
     }
   };
 
