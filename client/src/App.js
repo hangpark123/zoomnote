@@ -1800,6 +1800,8 @@ function App() {
                                 type="button"
                                 className="danger-outline-btn"
                                 onClick={handleClearTemplate}
+                                onMouseDown={handleClearTemplate}
+                                onTouchStart={handleClearTemplate}
                                 title="저장된 고정값을 해제합니다"
                                 style={{
                                   padding: '4px 12px',
@@ -1807,9 +1809,10 @@ function App() {
                                   height: 'auto',
                                   minHeight: 'auto',
                                   position: 'relative',
-                                  zIndex: 100,
+                                  zIndex: 9999,
                                   flexShrink: 0,
-                                  cursor: 'pointer'
+                                  cursor: 'pointer',
+                                  pointerEvents: 'auto'
                                 }}
                               >
                                 🔓 고정값 해제
