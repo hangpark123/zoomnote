@@ -1722,19 +1722,20 @@ function App() {
                                   handleSaveTemplate();
                                 }}
                                 style={{
-                                  padding: '2px 8px',
+                                  padding: '1px 8px',
                                   fontSize: '11px',
-                                  background: '#4CAF50',
-                                  color: 'white',
-                                  border: 'none',
+                                  background: 'transparent',
+                                  color: 'inherit',
+                                  border: '1px solid currentColor',
                                   borderRadius: '3px',
                                   cursor: 'pointer',
                                   userSelect: 'none',
-                                  display: 'inline-block'
+                                  display: 'inline-block',
+                                  opacity: 0.8
                                 }}
                                 title="현재 입력한 제목, 시작일, 종료일을 고정값으로 저장합니다"
                               >
-                                📌 저장
+                                고정값 저장
                               </span>
                             ) : (
                               <span
@@ -1744,19 +1745,20 @@ function App() {
                                   handleClearTemplate();
                                 }}
                                 style={{
-                                  padding: '2px 8px',
+                                  padding: '1px 8px',
                                   fontSize: '11px',
-                                  background: '#ff6b6b',
-                                  color: 'white',
-                                  border: 'none',
+                                  background: 'transparent',
+                                  color: '#ff6b6b', // 해제는 위험하므로 붉은색 계열 유지하되 텍스트/테두리로만
+                                  border: '1px solid currentColor',
                                   borderRadius: '3px',
                                   cursor: 'pointer',
                                   userSelect: 'none',
-                                  display: 'inline-block'
+                                  display: 'inline-block',
+                                  opacity: 0.9
                                 }}
                                 title="저장된 고정값을 해제합니다"
                               >
-                                🔓 해제
+                                고정값 해제
                               </span>
                             )}
                           </div>
