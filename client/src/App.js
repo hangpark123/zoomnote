@@ -948,7 +948,7 @@ function App() {
 
   // [고정값 해제]
   const handleClearTemplate = async () => {
-    if (!window.confirm('저장된 고정값을 해제하시겠습니까? (현재 작성 중인 내용은 유지됩니다)')) return;
+    // window.confirm 제거: Zoom App에서 차단될 가능성 있음
 
     try {
       const res = await fetch('/api/user/template', {
