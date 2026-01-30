@@ -937,7 +937,10 @@ function App() {
       const data = await res.json();
 
       alert(data.message || '고정값이 저장되었습니다.');
-      window.location.reload(); // 자동 새로고침
+
+      // 상태 업데이트 (새로고침 대신)
+      setUserTemplate({ title, start_date: periodStart ? toDateString(periodStart) : null, end_date: periodEnd ? toDateString(periodEnd) : null });
+      setHasTemplate(true);
     } catch (e) {
       alert('고정값 저장 중 오류가 발생했습니다: ' + e.message);
     }
@@ -957,7 +960,13 @@ function App() {
       const data = await res.json();
 
       alert(data.message || '고정값이 해제되었습니다.');
-      window.location.reload(); // 자동 새로고침
+
+      // 상태 업데이트 (새로고침 대신)
+      setUserTemplate(null);
+      setHasTemplate(false);
+      setTitle('');
+      setPeriodStart(null);
+      setPeriodEnd(null);
     } catch (e) {
       alert('고정값 해제 중 오류가 발생했습니다: ' + e.message);
     }
@@ -1698,31 +1707,41 @@ function App() {
                           <input className="input readonly-hint" value="저장 시 자동 생성" readOnly />
                         </div>
 
-                        {/* 고정값 저장/해제 버튼 */}
-                        <div className="form-group col-12" style={{ marginTop: '-8px', marginBottom: '8px' }}>
-                          {!hasTemplate ? (
-                            <button
-                              type="button"
-                              className="secondary-btn"
-                              onClick={handleSaveTemplate}
-                              title="현재 입력한 제목, 시작일, 종료일을 고정값으로 저장합니다"
-                            >
-                              📌 고정값 저장
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              className="danger-outline-btn"
-                              onClick={handleClearTemplate}
-                              title="저장된 고정값을 해제합니다"
-                            >
-                              🔓 고정값 해제
-                            </button>
-                          )}
-                        </div>
-
                         <div className="form-group col-12">
-                          <label>보고 제목</label>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                            <label style={{ margin: 0 }}>보고 제목</label>
+                            {!hasTemplate ? (
+                              <button
+                                type="button"
+                                className="secondary-btn"
+                                onClick={handleSaveTemplate}
+                                title="현재 입력한 제목, 시작일, 종료일을 고정값으로 저장합니다"
+                                style={{
+                                  padding: '4px 12px',
+                                  fontSize: '12px',
+                                  height: 'auto',
+                                  minHeight: 'auto'
+                                }}
+                              >
+                                📌 고정값 저장
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                className="danger-outline-btn"
+                                onClick={handleClearTemplate}
+                                title="저장된 고정값을 해제합니다"
+                                style={{
+                                  padding: '4px 12px',
+                                  fontSize: '12px',
+                                  height: 'auto',
+                                  minHeight: 'auto'
+                                }}
+                              >
+                                🔓 고정값 해제
+                              </button>
+                            )}
+                          </div>
                           <input className="input" placeholder="예: 12월 3주차 주간 연구 보고" value={title} onChange={(e) => setTitle(e.target.value)} />
                         </div>
                         <div className="form-group col-6">
