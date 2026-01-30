@@ -1711,8 +1711,8 @@ function App() {
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
                             <label style={{ margin: 0 }}>보고 제목</label>
                             {!hasTemplate ? (
-                              <button
-                                type="button"
+                              <span
+                                onMouseDown={(e) => { e.preventDefault(); handleSaveTemplate(); }}
                                 onClick={handleSaveTemplate}
                                 style={{
                                   padding: '2px 8px',
@@ -1721,15 +1721,17 @@ function App() {
                                   color: 'white',
                                   border: 'none',
                                   borderRadius: '3px',
-                                  cursor: 'pointer'
+                                  cursor: 'pointer',
+                                  userSelect: 'none',
+                                  display: 'inline-block'
                                 }}
                                 title="현재 입력한 제목, 시작일, 종료일을 고정값으로 저장합니다"
                               >
                                 📌 저장
-                              </button>
+                              </span>
                             ) : (
-                              <button
-                                type="button"
+                              <span
+                                onMouseDown={(e) => { e.preventDefault(); handleClearTemplate(); }}
                                 onClick={handleClearTemplate}
                                 style={{
                                   padding: '2px 8px',
@@ -1738,12 +1740,14 @@ function App() {
                                   color: 'white',
                                   border: 'none',
                                   borderRadius: '3px',
-                                  cursor: 'pointer'
+                                  cursor: 'pointer',
+                                  userSelect: 'none',
+                                  display: 'inline-block'
                                 }}
                                 title="저장된 고정값을 해제합니다"
                               >
                                 🔓 해제
-                              </button>
+                              </span>
                             )}
                           </div>
                           <input className="input" placeholder="예: 12월 3주차 주간 연구 보고" value={title} onChange={(e) => setTitle(e.target.value)} />
