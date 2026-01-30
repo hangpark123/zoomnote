@@ -948,7 +948,31 @@ function App() {
 
   // [고정값 해제]
   const handleClearTemplate = async () => {
-    if (!window.confirm('저장된 고정값을 해제하시겠습니까?')) return;
+    // 서버 로그 전송 (디버깅용)
+    try {
+      await fetch('/api/client-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'template-clear-button-clicked',
+          timestamp: new Date().toISOString(),
+          hasTemplate: hasTemplate,
+          userTemplate: userTemplate
+        })
+      });
+    } catch (e) { /* 로그 실패는 무시 */ }
+
+    if (!window.confirm('저장된 고정값을 해제하시겠습니까?')) {
+      // 취소 시에도 로그
+      try {
+        await fetch('/api/client-log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'template-clear-cancelled' })
+        });
+      } catch (e) { /* 로그 실패는 무시 */ }
+      return;
+    }
 
     try {
       const res = await fetch('/api/user/template', {

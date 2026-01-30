@@ -879,14 +879,22 @@ app.delete('/api/user/template', attachMe, async (req, res) => {
   try {
     const me = req.me;
 
+    console.log('🔓 [DELETE /api/user/template] 요청 받음:', {
+      zoom_user_id: me.zoom_user_id,
+      name: me.name,
+      timestamp: new Date().toISOString()
+    });
+
     await pool.query(
       'UPDATE users SET template_title = NULL, template_start_date = NULL, template_end_date = NULL WHERE zoom_user_id = ?',
       [me.zoom_user_id]
     );
 
+    console.log('✅ [DELETE /api/user/template] 성공:', me.zoom_user_id);
+
     res.json({ ok: true, message: '고정값이 해제되었습니다.' });
   } catch (e) {
-    console.error('DELETE /api/user/template error:', e.message);
+    console.error('❌ [DELETE /api/user/template] 에러:', e.message);
     res.status(500).json({ error: 'Server error' });
   }
 });
