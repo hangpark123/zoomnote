@@ -1774,23 +1774,23 @@ function App() {
                         </div>
 
                         <div className="form-group col-12">
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                            <label style={{ margin: 0, flexShrink: 0, flexGrow: 0 }}>보고 제목</label>
+                          <label>보고 제목</label>
+                          <input className="input" placeholder="예: 12월 3주차 주간 연구 보고" value={title} onChange={(e) => setTitle(e.target.value)} />
+
+                          {/* 고정값 버튼: input 아래, 오른쪽 정렬 */}
+                          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
                             {!hasTemplate ? (
                               <button
                                 type="button"
                                 className="secondary-btn"
                                 onClick={handleSaveTemplate}
+                                onMouseDown={handleSaveTemplate}
                                 title="현재 입력한 제목, 시작일, 종료일을 고정값으로 저장합니다"
                                 style={{
                                   padding: '4px 12px',
                                   fontSize: '12px',
                                   height: 'auto',
-                                  minHeight: 'auto',
-                                  position: 'relative',
-                                  zIndex: 100,
-                                  flexShrink: 0,
-                                  cursor: 'pointer'
+                                  minHeight: 'auto'
                                 }}
                               >
                                 📌 고정값 저장
@@ -1807,19 +1807,13 @@ function App() {
                                   padding: '4px 12px',
                                   fontSize: '12px',
                                   height: 'auto',
-                                  minHeight: 'auto',
-                                  position: 'relative',
-                                  zIndex: 9999,
-                                  flexShrink: 0,
-                                  cursor: 'pointer',
-                                  pointerEvents: 'auto'
+                                  minHeight: 'auto'
                                 }}
                               >
                                 🔓 고정값 해제
                               </button>
                             )}
                           </div>
-                          <input className="input" placeholder="예: 12월 3주차 주간 연구 보고" value={title} onChange={(e) => setTitle(e.target.value)} />
                         </div>
                         <div className="form-group col-6">
                           <label>시작일</label>
