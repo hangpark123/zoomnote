@@ -1710,7 +1710,24 @@ function App() {
                         <div className="form-group col-12">
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
                             <label style={{ margin: 0 }}>보고 제목</label>
-                            {hasTemplate && (
+                            {!hasTemplate ? (
+                              <button
+                                type="button"
+                                onClick={handleSaveTemplate}
+                                style={{
+                                  padding: '2px 8px',
+                                  fontSize: '11px',
+                                  background: '#4CAF50',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '3px',
+                                  cursor: 'pointer'
+                                }}
+                                title="현재 입력한 제목, 시작일, 종료일을 고정값으로 저장합니다"
+                              >
+                                📌 저장
+                              </button>
+                            ) : (
                               <button
                                 type="button"
                                 onClick={handleClearTemplate}
