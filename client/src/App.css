@@ -2134,3 +2134,20 @@ canvas {
     white-space: nowrap;
   }
 }
+
+/* Forced UI Fixes for Layout and Textarea */
+/* .print-meta-grid styles removed to respect original layout */
+
+/* Textarea specific styles to ensure multi-line input works */
+textarea.input {
+  min-height: 100px !important;
+  resize: vertical !important;
+  line-height: 1.5 !important;
+  white-space: pre-wrap !important;
+  overflow-y: auto !important;
+}
+
+/* Ensure Weekly Goal Label starts at new row if needed */
+.print-meta-grid .label-weekly-goal {
+  grid-column: 1 / 2 !important;
+}

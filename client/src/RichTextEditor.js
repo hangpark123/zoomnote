@@ -1,9 +1,12 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
+import BlotFormatter from "quill-blot-formatter";
+
+// Register BlotFormatter (Image Resize & Align)
+Quill.register("modules/blotFormatter", BlotFormatter);
 
 let registerPromise = null;
-let imageResizeAvailable = false;
 
 function ensureQuillRegistered() {
   if (registerPromise) return registerPromise;
@@ -16,38 +19,17 @@ function ensureQuillRegistered() {
 
       const AlignStyle = Quill.import("attributors/style/align");
       Quill.register(AlignStyle, true);
+
+      // BlotFormatter is already registered synchronously above
     } catch (e) {
-      // ignore (hot-reload / duplicate register)
+      // ignore
     }
 
-    imageResizeAvailable = false;
-    try {
-      if (typeof window !== "undefined") {
-        window.Quill = Quill;
-        if (!window.Quill.imports) window.Quill.imports = {};
-        if (!window.Quill.imports.parchment) {
-          try {
-            window.Quill.imports.parchment = Quill.import("parchment");
-          } catch (e) {
-            // ignore
-          }
-        }
-        if (!window.Quill.find && typeof Quill.find === "function") {
-          window.Quill.find = Quill.find.bind(Quill);
-        }
-      }
-
-      const mod = await import("quill-image-resize-module");
-      const ImageResize = mod?.default || mod?.ImageResize || mod;
-      if (ImageResize) {
-        Quill.register("modules/imageResize", ImageResize);
-        imageResizeAvailable = true;
-      }
-    } catch (e) {
-      imageResizeAvailable = false;
+    if (typeof window !== "undefined") {
+      window.Quill = Quill;
     }
 
-    return { imageResizeAvailable };
+    return { imageResizeAvailable: true };
   })();
 
   return registerPromise;
@@ -77,7 +59,7 @@ export default function RichTextEditor({ value, onChange, placeholder }) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { imageResizeAvailable: canResize } = await ensureQuillRegistered();
+      await ensureQuillRegistered();
       if (cancelled) return;
       if (!mountRef.current || quillRef.current) return;
 
@@ -88,12 +70,8 @@ export default function RichTextEditor({ value, onChange, placeholder }) {
             image: () => fileInputRef.current?.click(),
           },
         },
+        blotFormatter: {} // Enable BlotFormatter
       };
-      if (canResize) {
-        modules.imageResize = {
-          parchment: Quill.import("parchment"),
-        };
-      }
 
       const quill = new Quill(mountRef.current, {
         theme: "snow",
