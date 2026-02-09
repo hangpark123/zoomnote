@@ -1222,15 +1222,24 @@ function App() {
   }, [calendarYear, myNotes, openWriteForWeek]);
 
   const handleEditClick = (note, mode = 'self') => {
+    // [Safety] 날짜 파싱 안전장치
+    const safeDate = (val) => {
+      if (!val) return null;
+      const d = new Date(val);
+      return Number.isNaN(d.getTime()) ? null : d;
+    };
+
+    console.log('[DEBUG] handleEditClick Note:', note); // 디버깅용 로그
+
     setEditingMode(mode);
     setEditingNote(note);
-    setEditRecordDate(note.record_date ? new Date(note.record_date) : null);
+    setEditRecordDate(safeDate(note.record_date));
     setEditReportYear(note.report_year || '');
     setEditReportWeek(note.report_week || '');
     setEditSerialNo(note.serial_no || '');
     setEditTitle(note.title);
-    setEditPeriodStart(note.period_start ? new Date(note.period_start) : null);
-    setEditPeriodEnd(note.period_end ? new Date(note.period_end) : null);
+    setEditPeriodStart(safeDate(note.period_start));
+    setEditPeriodEnd(safeDate(note.period_end));
     setEditWeeklyGoal(note.weekly_goal || '');
     setEditContent(normalizeContentHtml(note.content || ''));
     setEditAttachments([]);
@@ -2603,8 +2612,7 @@ function App() {
               <button className="primary-btn" onClick={handleUpdateNote}>수정사항 저장</button>
             </div>
           </div>
-        </div>,
-        document.body
+        </div>
       )}
 
       {deleteTargetId && (
