@@ -999,7 +999,7 @@ function App() {
     if (!recordDate) missing.push('기록일자');
     if (!periodStart) missing.push('시작일');
     if (!periodEnd) missing.push('종료일');
-    if (!title.trim()) missing.push('보고 제목');
+    if (!title.trim()) missing.push('연구 제목');
     if (!weeklyGoal.trim()) missing.push('금주 목표');
     if (!hasContentValue(content)) missing.push('금주 연구 내용');
 
@@ -1742,7 +1742,7 @@ function App() {
 
                         <div className="form-group col-12">
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                            <label style={{ margin: 0 }}>보고 제목</label>
+                            <label style={{ margin: 0 }}>연구 제목</label>
                             {!hasTemplate ? (
                               <span
                                 onClick={(e) => {
@@ -1791,7 +1791,7 @@ function App() {
                               </span>
                             )}
                           </div>
-                          <input className="input" placeholder="예: 12월 3주차 주간 연구 보고" value={title} onChange={(e) => setTitle(e.target.value)} />
+                          <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} />
                         </div>
                         <div className="form-group col-6">
                           <label>시작일</label>
