@@ -911,6 +911,124 @@ const encodeHtml = (txt) =>
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
 
+function applyInlineMarkdown(escapedText = '') {
+  if (!escapedText) return '';
+  const codeTokens = [];
+  let rendered = escapedText.replace(/`([^`]+)`/g, (_, code) => {
+    const token = `%%CODE_${codeTokens.length}%%`;
+    codeTokens.push(`<code>${code}</code>`);
+    return token;
+  });
+
+  rendered = rendered.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  rendered = rendered.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+  rendered = rendered.replace(/__([^_\n]+)__/g, '<strong>$1</strong>');
+  rendered = rendered.replace(/~~([^~\n]+)~~/g, '<del>$1</del>');
+  rendered = rendered.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+  rendered = rendered.replace(/_([^_\n]+)_/g, '<em>$1</em>');
+
+  codeTokens.forEach((html, idx) => {
+    rendered = rendered.replace(`%%CODE_${idx}%%`, html);
+  });
+
+  return rendered;
+}
+
+function markdownToSafeHtml(raw = '') {
+  const source = String(raw ?? '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  if (!source.trim()) return '';
+
+  const lines = source.split('\n').map((line) => encodeHtml(line));
+  const html = [];
+  let listType = null;
+  let inCodeBlock = false;
+  let codeLines = [];
+
+  const closeList = () => {
+    if (!listType) return;
+    html.push(`</${listType}>`);
+    listType = null;
+  };
+
+  lines.forEach((line) => {
+    const trimmed = line.trim();
+
+    if (/^```/.test(trimmed)) {
+      closeList();
+      if (inCodeBlock) {
+        html.push(`<pre><code>${codeLines.join('\n')}</code></pre>`);
+        inCodeBlock = false;
+        codeLines = [];
+      } else {
+        inCodeBlock = true;
+      }
+      return;
+    }
+
+    if (inCodeBlock) {
+      codeLines.push(line);
+      return;
+    }
+
+    if (!trimmed) {
+      closeList();
+      return;
+    }
+
+    const heading = trimmed.match(/^(#{1,6})\s+(.+)$/);
+    if (heading) {
+      closeList();
+      const level = heading[1].length;
+      html.push(`<h${level}>${applyInlineMarkdown(heading[2])}</h${level}>`);
+      return;
+    }
+
+    if (/^(-{3,}|\*{3,}|_{3,})$/.test(trimmed)) {
+      closeList();
+      html.push('<hr />');
+      return;
+    }
+
+    const quote = trimmed.match(/^>\s?(.*)$/);
+    if (quote) {
+      closeList();
+      html.push(`<blockquote>${applyInlineMarkdown(quote[1])}</blockquote>`);
+      return;
+    }
+
+    const ulItem = trimmed.match(/^[-*+]\s+(.+)$/);
+    if (ulItem) {
+      if (listType !== 'ul') {
+        closeList();
+        html.push('<ul>');
+        listType = 'ul';
+      }
+      html.push(`<li>${applyInlineMarkdown(ulItem[1])}</li>`);
+      return;
+    }
+
+    const olItem = trimmed.match(/^\d+\.\s+(.+)$/);
+    if (olItem) {
+      if (listType !== 'ol') {
+        closeList();
+        html.push('<ol>');
+        listType = 'ol';
+      }
+      html.push(`<li>${applyInlineMarkdown(olItem[1])}</li>`);
+      return;
+    }
+
+    closeList();
+    html.push(`<p>${applyInlineMarkdown(trimmed)}</p>`);
+  });
+
+  if (inCodeBlock) {
+    html.push(`<pre><code>${codeLines.join('\n')}</code></pre>`);
+  }
+  closeList();
+  return html.join('');
+}
+
 const renderSignatureCell = (data, type, name = '', signedAt = null) => {
   let mark;
   if (!data) {
@@ -944,7 +1062,9 @@ const renderSignatureBox = (label, data, type, name = '', signedAt = null) => {
 function buildNoteSectionHtml(n) {
   const period = `${toDateStringSafe(n.period_start)} ~ ${toDateStringSafe(n.period_end)}`;
   const weekText = n.report_year ? `${n.report_year}년 ${n.report_week}주차` : '-';
-  const goalHtml = n.weekly_goal ? encodeHtml(n.weekly_goal).replace(/\n/g, '<br />') : '-';
+  const goalRaw = n.weekly_goal || '';
+  const goalLooksHtml = /<\/?[a-z][\s\S]*>/i.test(goalRaw);
+  const goalHtml = goalRaw ? (goalLooksHtml ? goalRaw : markdownToSafeHtml(goalRaw)) : '';
   const rawContent = n.content || '';
   const looksHtml = /<\/?[a-z][\s\S]*>/i.test(rawContent);
   const contentHtml = looksHtml ? rawContent : encodeHtml(rawContent).replace(/\n/g, '<br />');
@@ -993,7 +1113,7 @@ function buildNoteSectionHtml(n) {
           <tbody>
             <tr>
               <td class="content-box" style="font-size: 12px;">
-                ${goalHtml || '-'}
+                ${goalHtml ? `<div class="markdown-content">${goalHtml}</div>` : '-'}
               </td>
             </tr>
           </tbody>
@@ -1061,6 +1181,22 @@ function buildNoteHtml(note) {
     .content-table th { padding:8px 10px; font-weight:700; text-align:center; color:#0f172a; background:#f3f4f6; border:0; border-bottom:1px solid #cbd5e1; }
     .content-box { border:0; padding:10px 12px; font-size:13px; line-height:1.6; word-break:break-word; overflow-wrap:break-word; background:#fff; vertical-align:top; }
     .content-box img { max-width:100%; height:auto; }
+    .markdown-content { line-height:1.6; word-break:break-word; overflow-wrap:break-word; }
+    .markdown-content p { margin:0 0 8px; }
+    .markdown-content h1, .markdown-content h2, .markdown-content h3, .markdown-content h4, .markdown-content h5, .markdown-content h6 { margin:0 0 8px; line-height:1.4; }
+    .markdown-content h1 { font-size:18px; }
+    .markdown-content h2 { font-size:16px; }
+    .markdown-content h3 { font-size:15px; }
+    .markdown-content ul, .markdown-content ol { margin:0 0 8px 18px; padding:0; }
+    .markdown-content li { margin:2px 0; }
+    .markdown-content blockquote { margin:0 0 8px; padding:4px 10px; border-left:3px solid #cbd5e1; color:#475569; background:#f8fafc; }
+    .markdown-content hr { border:0; border-top:1px solid #cbd5e1; margin:10px 0; }
+    .markdown-content code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size:12px; padding:1px 4px; border-radius:4px; background:#e2e8f0; }
+    .markdown-content pre { margin:0 0 8px; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; background:#f8fafc; overflow-x:auto; }
+    .markdown-content pre code { padding:0; border-radius:0; background:transparent; }
+    .markdown-content a { color:#2563eb; text-decoration:underline; }
+    .markdown-content > *:first-child { margin-top:0; }
+    .markdown-content > *:last-child { margin-bottom:0; }
     section:last-of-type { page-break-after: auto; }
   `;
   const section = buildNoteSectionHtml(note);
@@ -1150,6 +1286,22 @@ async function buildExportHtml(ids) {
           .content-table th { padding:8px 10px; font-weight:700; text-align:center; color:#0f172a; background:#f3f4f6; border:0; border-bottom:1px solid #cbd5e1; }
           .content-box { border:0; padding:10px 12px; font-size:13px; line-height:1.6; word-break:break-word; overflow-wrap:break-word; background:#fff; vertical-align:top; }
           .content-box img { max-width:100%; height:auto; }
+          .markdown-content { line-height:1.6; word-break:break-word; overflow-wrap:break-word; }
+          .markdown-content p { margin:0 0 8px; }
+          .markdown-content h1, .markdown-content h2, .markdown-content h3, .markdown-content h4, .markdown-content h5, .markdown-content h6 { margin:0 0 8px; line-height:1.4; }
+          .markdown-content h1 { font-size:18px; }
+          .markdown-content h2 { font-size:16px; }
+          .markdown-content h3 { font-size:15px; }
+          .markdown-content ul, .markdown-content ol { margin:0 0 8px 18px; padding:0; }
+          .markdown-content li { margin:2px 0; }
+          .markdown-content blockquote { margin:0 0 8px; padding:4px 10px; border-left:3px solid #cbd5e1; color:#475569; background:#f8fafc; }
+          .markdown-content hr { border:0; border-top:1px solid #cbd5e1; margin:10px 0; }
+          .markdown-content code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size:12px; padding:1px 4px; border-radius:4px; background:#e2e8f0; }
+          .markdown-content pre { margin:0 0 8px; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; background:#f8fafc; overflow-x:auto; }
+          .markdown-content pre code { padding:0; border-radius:0; background:transparent; }
+          .markdown-content a { color:#2563eb; text-decoration:underline; }
+          .markdown-content > *:first-child { margin-top:0; }
+          .markdown-content > *:last-child { margin-bottom:0; }
           section:last-of-type { page-break-after: auto; }
         </style>
       </head>

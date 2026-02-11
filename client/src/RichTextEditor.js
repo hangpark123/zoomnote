@@ -35,11 +35,90 @@ function ensureQuillRegistered() {
   return registerPromise;
 }
 
-export default function RichTextEditor({ value, onChange, placeholder }) {
+function tryApplyMarkdownShortcut(quill) {
+  const range = quill.getSelection(true);
+  if (!range || range.length > 0) return false;
+
+  const [line, offset] = quill.getLine(range.index);
+  if (!line) return false;
+
+  const lineStart = range.index - offset;
+  const lineText = quill.getText(lineStart, offset);
+  if (!lineText) return false;
+
+  const applyLineFormat = (tokenLength, formatName, formatValue) => {
+    quill.deleteText(lineStart, tokenLength, "api");
+    quill.formatLine(lineStart, 1, formatName, formatValue, "api");
+    quill.setSelection(Math.max(lineStart, 0), 0, "silent");
+    return true;
+  };
+
+  const headingMatch = lineText.match(/^(#{1,6})\s$/);
+  if (headingMatch) {
+    return applyLineFormat(headingMatch[0].length, "header", headingMatch[1].length);
+  }
+
+  if (/^[-*+]\s$/.test(lineText)) {
+    return applyLineFormat(lineText.length, "list", "bullet");
+  }
+
+  if (/^\d+[.)]\s$/.test(lineText)) {
+    return applyLineFormat(lineText.length, "list", "ordered");
+  }
+
+  if (/^>\s$/.test(lineText)) {
+    return applyLineFormat(lineText.length, "blockquote", true);
+  }
+
+  if (/^```$/.test(lineText)) {
+    return applyLineFormat(lineText.length, "code-block", true);
+  }
+
+  return false;
+}
+
+function tryApplyInlineMarkdownShortcut(quill) {
+  const range = quill.getSelection(true);
+  if (!range || range.length > 0) return false;
+
+  const scanStart = Math.max(0, range.index - 300);
+  const textBeforeCursor = quill.getText(scanStart, range.index - scanStart);
+  if (!textBeforeCursor) return false;
+
+  const applyInline = (match, openLen, closeLen, formatName, formatValue = true) => {
+    if (!match) return false;
+    const prefix = match[1] || "";
+    const inner = match[2] || "";
+    if (!inner) return false;
+
+    const markerStart = scanStart + match.index + prefix.length;
+    const closeStart = markerStart + openLen + inner.length;
+
+    quill.deleteText(closeStart, closeLen, "api");
+    quill.deleteText(markerStart, openLen, "api");
+    quill.formatText(markerStart, inner.length, formatName, formatValue, "api");
+    quill.setSelection(markerStart + inner.length, 0, "silent");
+    return true;
+  };
+
+  const codeMatch = textBeforeCursor.match(/(^|[\s([{"'])`([^`\n]+)`$/);
+  if (applyInline(codeMatch, 1, 1, "code")) return true;
+
+  const boldMatch = textBeforeCursor.match(/(^|[\s([{"'])\*\*([^*\n]+)\*\*$/);
+  if (applyInline(boldMatch, 2, 2, "bold")) return true;
+
+  const italicMatch = textBeforeCursor.match(/(^|[\s([{"'])\*([^*\n]+)\*$/);
+  if (applyInline(italicMatch, 1, 1, "italic")) return true;
+
+  return false;
+}
+
+export default function RichTextEditor({ value, onChange, placeholder, compact = false }) {
   const mountRef = useRef(null);
   const quillRef = useRef(null);
   const fileInputRef = useRef(null);
   const isSettingValueRef = useRef(false);
+  const isApplyingShortcutRef = useRef(false);
   const lastHtmlRef = useRef("");
 
   const toolbarOptions = useMemo(
@@ -89,8 +168,31 @@ export default function RichTextEditor({ value, onChange, placeholder }) {
       }
       lastHtmlRef.current = quill.root.innerHTML;
 
-      const handleTextChange = () => {
+      const handleTextChange = (...args) => {
+        const [delta, , source] = args;
         if (isSettingValueRef.current) return;
+        if (source === "user" && !isApplyingShortcutRef.current) {
+          const insertedText = (delta?.ops || [])
+            .filter((op) => typeof op.insert === "string")
+            .map((op) => op.insert)
+            .join("");
+          if (
+            insertedText.includes(" ") ||
+            insertedText.includes("\n") ||
+            insertedText.includes("`") ||
+            insertedText.includes("*")
+          ) {
+            isApplyingShortcutRef.current = true;
+            try {
+              const lineApplied = tryApplyMarkdownShortcut(quill);
+              if (!lineApplied) {
+                tryApplyInlineMarkdownShortcut(quill);
+              }
+            } finally {
+              isApplyingShortcutRef.current = false;
+            }
+          }
+        }
         const html = quill.root.innerHTML;
         lastHtmlRef.current = html;
         onChange?.(html);
@@ -173,7 +275,7 @@ export default function RichTextEditor({ value, onChange, placeholder }) {
   };
 
   return (
-    <div className="rte-root">
+    <div className={`rte-root${compact ? " rte-compact" : ""}`}>
       <div ref={mountRef} />
       <input
         type="file"

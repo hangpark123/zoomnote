@@ -1,98 +1,185 @@
-# ZoomNote - 정보통신연구소 연구노트 시스템
+﻿# ZoomNote
 
-**ZoomNote**는 아이알링크(주) 정보통신연구소의 주간 업무 보고 및 연구 노트를 효율적으로 관리하기 위한 **Zoom Phone 연동 통합 시스템**입니다.
-Zoom 통화 기록 자동 연동, 주간 리포트 생성, 전자 결재(검토자/확인자), 그리고 관리자 기능을 통해 연구소 업무를 체계화합니다.
+Zoom 내에서 연구노트를 작성, 결재(확인/점검), 부서 단위로 관리하는 통합 웹앱입니다.  
+프론트엔드(React)와 백엔드(Express)가 하나의 저장소에서 운영되며, 서버가 `client/build` 정적 파일을 함께 서빙합니다.
 
-## ✨ 주요 기능
+## 주요 기능
 
-### 1. 📝 연구노트 작성 및 관리
-- **주간 자동 생성**: 매주 월요일, 해당 주차의 연구노트가 자동으로 생성됩니다.
-- **Zoom Phone 연동**: Zoom 통화 이력이 자동으로 불러와지며, 통화 내용을 바탕으로 업무 일지를 작성할 수 있습니다. (녹음 파일 듣기 지원)
-- **에디터**: 이미지 첨부, 텍스트 서식 등을 지원하는 리치 텍스트 에디터를 제공합니다.
-- **임시 저장 및 제출**: 작성 중인 내용은 자동/수동 저장이 가능하며, 완료 시 검토자에게 제출됩니다.
+- 내 연구노트 작성/수정/조회
+- 결재 플로우: 기록자 -> 확인자 -> 점검자
+- 부서별 문서함(리더), 관리자 문서 수정(마스터)
+- 주차 기반 문서번호 자동 생성 (`YYYY-WW-NNN`)
+- 주차별 휴가자 설정 및 누락자 집계
+- 선택 문서 PDF 내보내기 / 다건 출력
+- 연구 내용 마크다운 입력 단축 지원
+  - 블록: `# + 공백`, `- + 공백`, `1. + 공백`, `> + 공백`, ````` 
+  - 인라인: `**굵게**`, `*기울임*`, `` `코드` ``
 
-### 2. 👥 부서별 문서함 & 전자 결재
-- **문서 조회**: 작성된 연구노트는 부서별로 공유되며, 권한에 따라 열람할 수 있습니다.
-- **PDF 저장**: 여러 건의 연구노트를 선택하여 하나의 PDF 파일로 일괄 변환 및 다운로드가 가능합니다.
-- **결재 시스템**: 작성자 -> 검토자(팀장) -> 확인자(소장) 단계의 전자 서명 기능을 제공합니다.
+## 아키텍처
 
-### 3. 🛠 관리자(Admin) 기능
-- **직원 현황 관리**: 전체 직원의 주간 연구노트 제출 현황을 한눈에 파악할 수 있습니다.
-- **휴가자 및 누락자 관리**:
-    - **주차 휴가자 설정**: 특정 주차에 휴가인 인원을 설정하여 제출 대상에서 제외합니다.
-    - **누락자 목록**: 매주 연구노트를 생성하지 않거나 제출하지 않은 인원을 자동으로 집계하여 경고(Missing Box)를 표시합니다.
-- **문서 수정 권한**: 관리자는 다른 직원의 문서를 열람하고 필요한 경우 수정하거나 삭제할 수 있습니다.
+- `client` (React SPA): 작성/결재/관리 UI
+- `server.js` (Express API): 인증, 권한, 문서 CRUD, 결재, PDF, 사용자/휴가 관리
+- `MySQL`:
+  - `users`, `departments`
+  - `research_notes`, `research_note_files`
+  - `user_vacations`
+  - `zoom_oauth_tokens`
 
-### 4. 🎨 UI/UX 편의성
-- **다크 모드**: 야간 작업 시 눈의 피로를 줄여주는 다크 모드를 완벽 지원합니다.
-- **반응형 디자인**: 다양한 해상도에서 최적화된 레이아웃을 제공합니다. (직원 카드, 검색창 등)
-- **부서별 검색**: 작성자, 제목, 문서번호 등으로 빠르고 정확하게 문서를 찾을 수 있습니다.
+## 기술 스택
 
----
+### Frontend
 
-## 🚀 설치 및 실행 방법
+- React 19 + CRA (`react-scripts`)
+- Quill 2 에디터 (`quill`, `quill-blot-formatter`)
+- `react-datepicker`
+- Zoom Apps SDK (`@zoom/appssdk`)
 
-### 필수 요구사항
-- Node.js (v14 이상 권장)
-- MySQL / MariaDB (데이터베이스)
-- Zoom App Credentials (Zoom API 연동 시)
+### Backend
 
-### 1. 환경 변수 설정 (`.env`)
-프로젝트 루트와 `client` 폴더에 `.env` 파일이 필요합니다. (현재 저장소에 포함됨)
+- Node.js + Express 5
+- MySQL (`mysql2/promise`)
+- 파일 업로드 (`multer`, memory storage)
+- PDF/Export (`puppeteer`, `archiver`, `pdfkit`)
 
-### 2. 패키지 설치
+### Security / Runtime
+
+- CORS + Cookie 세션
+- CSP/HSTS/Referrer-Policy 헤더 적용
+- 정적 파일 no-cache 서빙(Zoom 앱 최신 리소스 강제)
+
+## 핵심 로직
+
+### 1) 사용자 식별/권한 (`attachMe`)
+
+- 우선순위로 사용자 식별:
+  1. Zoom App Context Header
+  2. 서버 세션 쿠키
+  3. OAuth 토큰 기반 Zoom API 조회
+- 최초 진입/동기화 시 사용자 upsert 수행
+- 시스템 권한(`staff`, `leader`, `admin`, `master`)에 따라 API 접근 제한
+
+### 2) 문서 생성/수정
+
+- 생성 시 필수값 검증(기록일, 기간, 제목, 목표, 내용)
+- 사용자 서명 미등록 시 생성 차단
+- 주차별 시퀀스로 문서번호 자동 생성
+- 첨부파일은 별도 테이블(`research_note_files`)로 저장
+
+### 3) 결재(서명) 플로우
+
+- `/api/research-notes/:id/sign`에서 `checker`/`reviewer` 서명 처리
+- 마스터는 대리서명(`proxyZoomUserId`) 가능
+- 확인 완료된 문서는 일반 사용자 삭제/수정 제한
+
+### 4) 휴가/누락 관리
+
+- 마스터가 주차 휴가자 설정
+- 휴가자에 대해 휴가 문서 생성/삭제 동기화
+- 관리자 화면에서 주차 누락자 자동 집계
+
+### 5) PDF/내보내기
+
+- 단일/다중 문서를 HTML 렌더 후 Puppeteer로 PDF 생성
+- 결재 정보(이름/서명/시각), 금주 목표/연구 내용 포함
+
+## API 요약
+
+- 인증/사용자
+  - `GET /api/me`
+  - `GET /api/users`, `PUT /api/users/:zoomUserId/role`
+- 서명
+  - `GET /api/my-signature`, `POST /api/my-signature`
+- 노트
+  - `GET /api/research-notes`
+  - `POST /api/research-notes`
+  - `PUT /api/research-notes/:id`
+  - `DELETE /api/research-notes/:id`
+  - `POST /api/research-notes/:id/sign`
+- 첨부 다운로드
+  - `GET /api/research-notes/:id/download`
+  - `GET /api/research-notes/:noteId/files/:fileId/download`
+- 내보내기
+  - `GET /api/research-notes/export-pdf`
+  - `POST /api/research-notes/export`
+- 휴가
+  - `GET /api/vacations`, `GET /api/my-vacations`, `POST /api/vacations`
+
+## 디렉토리 구조
+
+```text
+zoomnote/
+  client/                  # React 앱
+    src/
+      App.js
+      App.css
+      RichTextEditor.js
+  db/
+    research_notes_schema.sql
+  server.js                # Express API + static serving
+  scripts/
+  README.md
+```
+
+## 실행 방법
+
+### 1) 의존성 설치
+
 ```bash
-# 서버 의존성 설치
 npm install
-
-# 클라이언트 의존성 설치
 cd client
 npm install
 ```
 
-### 3. 데이터베이스 설정
-`db/research_notes_schema.sql` 파일을 실행하여 초기 테이블 구조를 생성합니다.
+### 2) DB 초기화
 
-### 4. 빌드 및 실행
 ```bash
-# 클라이언트 빌드
+# SQL 직접 실행
+# db/research_notes_schema.sql
+
+# 또는 스크립트 사용(프로젝트 스크립트에 맞게)
+npm run db:reset
+```
+
+### 3) 빌드 및 실행
+
+```bash
 cd client
 npm run build
 cd ..
-
-# 서버 실행
 node server.js
-# 또는 PM2 사용 시: pm2 start server.js --name zoomnote
 ```
 
----
+## 환경 변수 (예시)
 
-## 📖 사용자 가이드 (User Guide)
+### Server `.env`
 
-### 1. 로그인 및 메인 화면
-- 시스템 접속 시 자동으로 SSO 또는 사전 정의된 계정으로 로그인됩니다.
-- **내 연구노트 작성**: 이번 주차의 업무 내용을 기록합니다. 'Zoom 통화 내역' 버튼을 눌러 통화 기록을 참고할 수 있습니다.
+```env
+PORT=5000
 
-### 2. 연구노트 제출
-- 작성이 완료되면 **[제출]** 버튼을 누릅니다.
-- 제출 후에는 수정이 제한될 수 있으며, 검토자(팀장)에게 알림이 갑니다.
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=zoomnote
 
-### 3. PDF 저장
-- **부서별 문서함** 탭에서 본인 또는 부서원의 노트를 선택합니다.
-- 우측 상단의 **[PDF 저장]** 버튼을 눌러 문서를 다운로드/인쇄할 수 있습니다.
+ZOOM_CLIENT_ID=
+ZOOM_CLIENT_SECRET=
+ZOOM_OAUTH_REDIRECT_URI=
+ZOOM_ACCOUNT_ID=
 
----
+APP_SUCCESS_REDIRECT=/
+ALLOW_DEV_FALLBACK=false
+```
 
-## 🛡 관리자 가이드 (Admin Guide)
+### Client `.env`
 
-### 1. 주차 누락자 확인
-- **관리자 수정** 탭으로 이동합니다.
-- 화면 중앙의 **'주차 누락자 목록'** 박스를 확인합니다. (노란색/회색 박스)
-- 해당 주차에 문서를 생성하지 않은 직원이 표시됩니다.
+```env
+REACT_APP_API_BASE=http://localhost:5000
+REACT_APP_ALLOW_DEV_FALLBACK=false
+```
 
-### 2. 휴가 처리
-- **'주차 휴가자 설정'** 박스에서 휴가 중인 직원을 체크합니다.
-- 체크된 직원은 누락자 목록에서 제외되며 '휴가' 상태로 표시됩니다.
+## 운영 메모
 
-### 3. 문서 강제 수정
-- 직원이 실수로 잘못 작성했거나 수정이 필요한 경우, 관리자 권한으로 문서를 열어 내용을 수정하고 저장할 수 있습니다.
+- 프로덕션은 `client/build`가 있어야 웹 UI가 정상 서빙됩니다.
+- 대량 PDF 생성은 시간이 길어질 수 있어 서버 타임아웃이 10분으로 설정돼 있습니다.
+- 캐시 무효화 헤더가 적용되어 Zoom 내에서도 최신 JS/CSS를 우선 로드합니다.

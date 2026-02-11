@@ -81,6 +81,163 @@ function normalizeContentHtml(raw = '') {
   return value.replace(/(\r\n|\n|\r)/g, '<br />');
 }
 
+function escapeHtml(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function applyInlineMarkdown(escapedText = '') {
+  if (!escapedText) return '';
+  const codeTokens = [];
+  let rendered = escapedText.replace(/`([^`]+)`/g, (_, code) => {
+    const token = `%%CODE_${codeTokens.length}%%`;
+    codeTokens.push(`<code>${code}</code>`);
+    return token;
+  });
+
+  rendered = rendered.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  rendered = rendered.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+  rendered = rendered.replace(/__([^_\n]+)__/g, '<strong>$1</strong>');
+  rendered = rendered.replace(/~~([^~\n]+)~~/g, '<del>$1</del>');
+  rendered = rendered.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+  rendered = rendered.replace(/_([^_\n]+)_/g, '<em>$1</em>');
+
+  codeTokens.forEach((html, idx) => {
+    rendered = rendered.replace(`%%CODE_${idx}%%`, html);
+  });
+
+  return rendered;
+}
+
+function markdownToSafeHtml(raw = '') {
+  const source = String(raw ?? '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  if (!source.trim()) return '';
+
+  const lines = source.split('\n').map((line) => escapeHtml(line));
+  const html = [];
+  let listType = null;
+  let inCodeBlock = false;
+  let codeLines = [];
+
+  const closeList = () => {
+    if (!listType) return;
+    html.push(`</${listType}>`);
+    listType = null;
+  };
+
+  lines.forEach((line) => {
+    const trimmed = line.trim();
+
+    if (/^```/.test(trimmed)) {
+      closeList();
+      if (inCodeBlock) {
+        html.push(`<pre><code>${codeLines.join('\n')}</code></pre>`);
+        inCodeBlock = false;
+        codeLines = [];
+      } else {
+        inCodeBlock = true;
+      }
+      return;
+    }
+
+    if (inCodeBlock) {
+      codeLines.push(line);
+      return;
+    }
+
+    if (!trimmed) {
+      closeList();
+      return;
+    }
+
+    const heading = trimmed.match(/^(#{1,6})\s+(.+)$/);
+    if (heading) {
+      closeList();
+      const level = heading[1].length;
+      html.push(`<h${level}>${applyInlineMarkdown(heading[2])}</h${level}>`);
+      return;
+    }
+
+    if (/^(-{3,}|\*{3,}|_{3,})$/.test(trimmed)) {
+      closeList();
+      html.push('<hr />');
+      return;
+    }
+
+    const quote = trimmed.match(/^>\s?(.*)$/);
+    if (quote) {
+      closeList();
+      html.push(`<blockquote>${applyInlineMarkdown(quote[1])}</blockquote>`);
+      return;
+    }
+
+    const ulItem = trimmed.match(/^[-*+]\s+(.+)$/);
+    if (ulItem) {
+      if (listType !== 'ul') {
+        closeList();
+        html.push('<ul>');
+        listType = 'ul';
+      }
+      html.push(`<li>${applyInlineMarkdown(ulItem[1])}</li>`);
+      return;
+    }
+
+    const olItem = trimmed.match(/^\d+\.\s+(.+)$/);
+    if (olItem) {
+      if (listType !== 'ol') {
+        closeList();
+        html.push('<ol>');
+        listType = 'ol';
+      }
+      html.push(`<li>${applyInlineMarkdown(olItem[1])}</li>`);
+      return;
+    }
+
+    closeList();
+    html.push(`<p>${applyInlineMarkdown(trimmed)}</p>`);
+  });
+
+  if (inCodeBlock) {
+    html.push(`<pre><code>${codeLines.join('\n')}</code></pre>`);
+  }
+  closeList();
+  return html.join('');
+}
+
+function renderGoalHtml(value = '') {
+  const source = String(value || '');
+  if (!source) return '';
+  const looksLikeHtml = /<\/?[a-z][\s\S]*>/i.test(source);
+  if (looksLikeHtml) return source;
+  return markdownToSafeHtml(source);
+}
+
+function toGoalPlainText(value = '') {
+  const source = String(value || '');
+  if (!source) return '';
+  const looksLikeHtml = /<\/?[a-z][\s\S]*>/i.test(source);
+  if (!looksLikeHtml) return source;
+
+  let text = source
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|div|li|h[1-6]|blockquote|pre)>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '- ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ');
+
+  if (typeof document !== 'undefined') {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = text;
+    text = textarea.value;
+  }
+
+  return text.replace(/\s+/g, ' ').trim();
+}
+
 function parseYearWeekKey(key) {
   const txt = String(key || '').trim();
   const m = txt.match(/(\d+)\s*년\s*(\d+)\s*주차/);
@@ -1000,7 +1157,7 @@ function App() {
     if (!periodStart) missing.push('시작일');
     if (!periodEnd) missing.push('종료일');
     if (!title.trim()) missing.push('연구 제목');
-    if (!weeklyGoal.trim()) missing.push('금주 목표');
+    if (!hasContentValue(weeklyGoal)) missing.push('금주 목표');
     if (!hasContentValue(content)) missing.push('금주 연구 내용');
 
     if (missing.length > 0) {
@@ -1240,7 +1397,7 @@ function App() {
     setEditTitle(note.title);
     setEditPeriodStart(safeDate(note.period_start));
     setEditPeriodEnd(safeDate(note.period_end));
-    setEditWeeklyGoal(note.weekly_goal || '');
+    setEditWeeklyGoal(toGoalPlainText(note.weekly_goal || ''));
     setEditContent(normalizeContentHtml(note.content || ''));
     setEditAttachments([]);
     if (editFileInputRef.current) editFileInputRef.current.value = '';
@@ -1807,16 +1964,17 @@ function App() {
                     <div className="form-section">
                       <div className="section-title">02. 상세 내용</div>
                       <div className="form-group">
-                        <label>금주 목표</label>
-                        <textarea
+                        <label className="strong-form-label">금주 목표</label>
+                        <input
                           className="input"
                           value={weeklyGoal}
                           onChange={(e) => setWeeklyGoal(e.target.value)}
-                          style={{ minHeight: '80px', resize: 'vertical', lineHeight: '1.5' }}
+                          placeholder="금주 목표를 입력하세요."
                         />
                       </div>
                       <div className="form-group">
-                        <label>금주 연구 내용</label>
+                        <label className="strong-form-label">금주 연구 내용</label>
+                        <div className="markdown-help">마크다운 사용 가능</div>
                         <RichTextEditor
                           value={content}
                           onChange={setContent}
@@ -2009,12 +2167,20 @@ function App() {
                                         onChange={toggleWeekSelection}
                                       />
                                     </th>
-                                    <th>작성자</th><th>제목</th><th>기간</th><th>확인자</th><th>점검자</th><th style={{ textAlign: 'right' }}>기능</th>
+                                    <th>작성자</th><th>제목</th><th>확인자</th><th>점검자</th><th style={{ textAlign: 'right' }}>기능</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   {weekNotes.map((note) => (
-                                    <tr key={note.id}>
+                                    <tr
+                                      key={note.id}
+                                      className="dept-note-row"
+                                      onDoubleClick={(e) => {
+                                        const target = e.target;
+                                        if (target && typeof target.closest === 'function' && target.closest('button, input, a, select, textarea, label')) return;
+                                        handlePrintNote(note);
+                                      }}
+                                    >
                                       <td style={{ textAlign: 'center' }}>
                                         <input
                                           type="checkbox"
@@ -2031,7 +2197,6 @@ function App() {
                                           </span>
                                         )}
                                       </td>
-                                      <td>{toDateString(note.period_start)} ~ {toDateString(note.period_end)}</td>
                                       <td>
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
                                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -2088,7 +2253,6 @@ function App() {
                                       <td style={{ textAlign: 'right' }}>
                                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
                                           <button className="secondary-btn" style={{ padding: '4px 8px', fontSize: '12px' }} onClick={() => handlePrintNote(note)}>보기</button>
-                                          <button className="danger-outline-btn" style={{ padding: '4px 8px', fontSize: '12px' }} onClick={() => handleDeleteRequest(note.id)}>삭제</button>
                                         </div>
                                       </td>
                                     </tr>
@@ -2438,8 +2602,17 @@ function App() {
                   </thead>
                   <tbody>
                     <tr>
-                      <td className="print-content-body" style={{ padding: '12px', minHeight: '60px', whiteSpace: 'pre-wrap', fontSize: 12 }}>
-                        {previewNote.weekly_goal || '-'}
+                      <td className="print-content-body" style={{ padding: '12px', minHeight: '60px', fontSize: 12 }}>
+                        {previewNote.weekly_goal ? (
+                          <div className="ql-snow">
+                            <div
+                              className="ql-editor"
+                              dangerouslySetInnerHTML={{ __html: renderGoalHtml(previewNote.weekly_goal) }}
+                            />
+                          </div>
+                        ) : (
+                          '-'
+                        )}
                       </td>
                     </tr>
                   </tbody>
@@ -2572,19 +2745,20 @@ function App() {
 
                   <div className="form-section">
                     <div className="form-group">
-                      <label>금주 목표</label>
-                      <textarea
+                      <label className="strong-form-label">금주 목표</label>
+                      <input
                         className="input"
                         value={editWeeklyGoal}
                         onChange={(e) => setEditWeeklyGoal(e.target.value)}
-                        style={{ minHeight: '80px', resize: 'vertical', lineHeight: '1.5' }}
+                        placeholder="금주 목표를 수정하세요."
                       />
                     </div>
                   </div>
 
                   <div className="form-section">
                     <div className="form-group">
-                      <label>연구/업무 내용</label>
+                      <label className="strong-form-label">금주 연구 내용</label>
+                      <div className="markdown-help">마크다운 사용 가능</div>
                       <RichTextEditor
                         value={editContent}
                         onChange={setEditContent}
